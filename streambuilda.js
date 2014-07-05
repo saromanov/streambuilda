@@ -38,10 +38,14 @@ function readFile(name){
 	}
 	else
 	{
-		var result = [];
+		var result = '';
 		for(var n in name){
-			result.push(files.readFileSync(name[n], {encoding: 'utf-8'}));
+			value = readFileHelpful(name[n]);
+			if(value != 'error'){
+				result += value + '\n';
+			}
 		}
+		console.log(result);
 		return result;
 	}
 }
@@ -50,7 +54,7 @@ function readFileHelpful(name){
 	try{
 		return files.readFileSync(name, {encoding: 'utf-8'});
 	}catch(e){
-		return 'error to load file ' + name;
+		return 'error';
 	}
 }
 
