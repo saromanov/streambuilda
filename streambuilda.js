@@ -1,3 +1,4 @@
+
 files = require('fs');
 http = require('http');
 
@@ -45,16 +46,28 @@ function readFile(name){
 				result += value + '\n';
 			}
 		}
-		console.log(result);
 		return result;
 	}
 }
+
 
 function readFileHelpful(name){
 	try{
 		return files.readFileSync(name, {encoding: 'utf-8'});
 	}catch(e){
 		return 'error';
+	}
+}
+
+
+//Read all files in dir
+function readAllFiles(path){
+	try
+	{
+		var data = files.readdirSync(path);
+		return readFile(data);
+	}catch(e){
+		return "error";
 	}
 }
 
@@ -120,9 +133,30 @@ function Builder(name)
 }
 
 Builder.prototype = {
-	read: function(path){
-		this.fast.push(Response([readFile, path], this.named, 'read'));
+	/*
+		read data for several ways:
+		read('path.js') => set in storage data from path.js
+		read(['path1.js', 'path2.js']) => merge data from two files
+		read('.') => read all files in dir
+	*/
+
+	create: function(data){
+		var f = data['files'];
+		for(var i = 0;i < f.length;++i)
+			writeFile(f[i],'');
+		var d = data['dirs'];
+		for(var i = 0;i < d.length;++i){
+			files.mkdir(d[i], files.EEXIST);
+		}
 	},
+
+	read: function(path){
+		if(path[path.length-1] == '.')
+			this.fast.push(Response([readAllFiles, path], this.named, 'read'));
+		else
+			this.fast.push(Response([readFile, path], this.named, 'read'));
+	},
+
 	mkdir: function(path, err){
 		fast = this.fast;
 		mkdirp(path, function(e){
@@ -137,6 +171,12 @@ Builder.prototype = {
 		this.fast.push(Action(func, this.named, 'action'));
 	},
 
+
+	/*
+		Write simple log message
+		log("message") => >message
+	*/
+
 	log: function(message){
 		this.fast.push(Response([logMessage, message], this.named, 'log message'));
 	},
@@ -145,6 +185,13 @@ Builder.prototype = {
 	modules: function(lmodules){
 		this.fast.push(Response([loadModules, lmodules], this.named, 'load modules'));
 	},
+
+	//TODO:Compine two js files;
+	links: function(files){
+
+	},
+
+	//TODO:Check run files
 
 	write: function(path){
 		this.fast.push(Action(writeFile, path, this.named));
