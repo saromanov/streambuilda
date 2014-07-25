@@ -66,9 +66,8 @@ var TaskSystem = (function(){
 			var args = Array.prototype.slice.call(arguments, 0)[0];
 			if(Object.keys(args).length == 2)
 				gr.set(args['name'], args['func']);
-			else{
+			else
 				gr.setParents(args)
-			}
 		},
 
 		//Append arguments
@@ -91,9 +90,7 @@ var TaskSystem = (function(){
 				var nodes = graph.get(x)['nodes'];
 				nodes.forEach(function(y){
 					var singlenode = graph.get(y);
-					console.log(singlenode);
 					if(singlenode.result == undefined){
-						//console.log(singlenode.args);
 						var result = singlenode.func(singlenode.args);
 						graph.update(singlenode.name, 'result', result);
 					}
@@ -103,9 +100,9 @@ var TaskSystem = (function(){
 				var nodes = graph.get(x)['argsfrom'];
 				var listofresults = nodes.map(function(x){ return graph.get(x)['result']});
 				var result = graph.get(x)['func'].apply(this, listofresults);
-				graph.update(x, 'result', result);
-				
+				graph.update(x, 'result', result);			
 			})
 		}
 	}
 })();
+
