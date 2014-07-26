@@ -1,3 +1,24 @@
+// Hello.
+//
+// This is JSHint, a tool that helps to detect errors and potential
+// problems in your JavaScript code.
+//
+// To start, simply enter some JavaScript anywhere on this page. Your
+// report will appear on the right side.
+//
+// Additionally, you can toggle specific options in the Configure
+// menu.
+
+//Stream and build systems
+//http://gearjs.org/
+//https://github.com/gulpjs/gulp
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/A_re-introduction_to_JavaScript
+
+//Используемые библиотеки
+//fast-list, paralell, graphdracula (отрисовка событий)
+
+//Работа со сборщиком пакетов
+//http://bytedebugger.wordpress.com/2014/07/16/tutorialdesktop-development-with-node-js-and-grunt/
 
 files = require('fs');
 http = require('http');
@@ -9,6 +30,8 @@ var Parallel = require('paralleljs');
 var fastjs =  require('fast.js');
 	//https://github.com/substack/node-mkdirp
 	mkdirp = require('mkdirp');
+	Promise = require('bluebird');
+	TaskSystem = require('./tasks')
 //var gdracula = require('graphdracula')
 function Task(){
  var tasks={};
@@ -107,6 +130,16 @@ function writeFile(path, data){
 	});
 }
 
+function createData(data){
+	var f = data['files'];
+	for(var i = 0;i < f.length;++i)
+		writeFile(f[i],'');
+	var d = data['dirs'];
+	for(var i = 0;i < d.length;++i){
+		files.mkdir(d[i], files.EEXIST);
+	}
+}
+
 
 function Response(data, name, action){
 	return {"action":action, "time":new Date(), "result": data[0](data[1]), 
@@ -141,13 +174,7 @@ Builder.prototype = {
 	*/
 
 	create: function(data){
-		var f = data['files'];
-		for(var i = 0;i < f.length;++i)
-			writeFile(f[i],'');
-		var d = data['dirs'];
-		for(var i = 0;i < d.length;++i){
-			files.mkdir(d[i], files.EEXIST);
-		}
+		
 	},
 
 	read: function(path){
@@ -197,6 +224,13 @@ Builder.prototype = {
 		this.fast.push(Action(writeFile, path, this.named));
 	},
 
+	tasks: function(tasklist){
+		var tasksystem = new TaskSystem;
+		tasklist.forEach(function(x){
+			tasksystem.task(x);
+		});
+	},
+
 	//run all events
 	run: function(){
 		var store = new Store();
@@ -215,18 +249,4 @@ Builder.prototype = {
 			}
 		}
 	}
-}
-
-
-//Load something from internet
-//http://nodejs.org/api/http.html
-function loadFromNet(path){
-
-}
-
-//Создание файла
-function createFile(path){
-	return function(){
-
-	};
 }

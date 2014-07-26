@@ -1,4 +1,5 @@
-
+var async = require('async')
+	fs = require('fs')
 
 //Data is dict object
 var filter1 = function(data, key, value){
@@ -43,6 +44,10 @@ var TaskGraph = function(){
 			return filter1(graph, 'type', 'complex');
 		},
 
+		getSingleNodes: function(){
+			return filter1(graph, 'type', 'single');
+		},
+
 		//Update node. For Ex: Set in result value
 		update: function(node, type, value){
 			if(node in graph){
@@ -62,6 +67,13 @@ var TaskGraph = function(){
 var TaskSystem = (function(){
 	var gr = new TaskGraph();
 	return {
+
+		/* Append new task. Task can be on two types: Single or parent.
+		arguments for task:
+		name - title of task
+		func - current function for task
+		*/
+
 		task: function(name,data){
 			var args = Array.prototype.slice.call(arguments, 0)[0];
 			if(Object.keys(args).length == 2)
@@ -84,8 +96,15 @@ var TaskSystem = (function(){
 		run: function(){
 			var graph = gr;
 			var complexNodes = graph.getComplexNodes();
-			if(complexNodes.length == 0)
-				throw new EmptyTaskException('This node has no tasks');
+			if(complexNodes.length == 0){
+				//Case without a complex nodes
+				singleNodes = graph.getSingleNodes();
+				singleNodes.forEach(function(x){
+					sgraph = graph.get(x);
+					sgraph.func(sgraph.args)
+				});
+				//throw new EmptyTaskException('This node has no tasks');
+			}else {
 			complexNodes.forEach(function(x){
 				var nodes = graph.get(x)['nodes'];
 				nodes.forEach(function(y){
@@ -100,9 +119,12 @@ var TaskSystem = (function(){
 				var nodes = graph.get(x)['argsfrom'];
 				var listofresults = nodes.map(function(x){ return graph.get(x)['result']});
 				var result = graph.get(x)['func'].apply(this, listofresults);
-				graph.update(x, 'result', result);			
+				graph.update(x, 'result', result);	
 			})
 		}
 	}
+}
 })();
+
+module.exports = TaskSystem;
 
