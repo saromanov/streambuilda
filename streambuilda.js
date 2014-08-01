@@ -1,25 +1,3 @@
-// Hello.
-//
-// This is JSHint, a tool that helps to detect errors and potential
-// problems in your JavaScript code.
-//
-// To start, simply enter some JavaScript anywhere on this page. Your
-// report will appear on the right side.
-//
-// Additionally, you can toggle specific options in the Configure
-// menu.
-
-//Stream and build systems
-//http://gearjs.org/
-//https://github.com/gulpjs/gulp
-//https://developer.mozilla.org/en-US/docs/Web/JavaScript/A_re-introduction_to_JavaScript
-
-//Используемые библиотеки
-//fast-list, paralell, graphdracula (отрисовка событий)
-
-//Работа со сборщиком пакетов
-//http://bytedebugger.wordpress.com/2014/07/16/tutorialdesktop-development-with-node-js-and-grunt/
-
 files = require('fs');
 http = require('http');
 
@@ -31,29 +9,14 @@ var fastjs =  require('fast.js');
 	//https://github.com/substack/node-mkdirp
 	mkdirp = require('mkdirp');
 	Promise = require('bluebird');
-	TaskSystem = require('./tasks')
-//var gdracula = require('graphdracula')
-function Task(){
- var tasks={};
-}
+	requirejs = require('requirejs')
 
-Task.prototype.add_task = function(){
-	if(arguments.length > 0){
-		tasks[arguments[0]] = arguments[1];
-	}
-};
+requirejs.config({
+    baseUrl: __dirname,
+    nodeRequire: require
+});
 
-
-//Граф для задач
-function GraphTask(){
-
-}
-
-//Очередь в виде графа (с нодами)
-function GraphQueue(){
-
-}
-
+var TaskSystem = requirejs('tasks')
 
 //Чтение файла
 function readFile(name){
@@ -250,3 +213,4 @@ Builder.prototype = {
 		}
 	}
 }
+

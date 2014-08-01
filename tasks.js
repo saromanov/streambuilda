@@ -1,6 +1,11 @@
 var async = require('async')
 	fs = require('fs')
 
+
+define(function(req){
+	return TaskSystem;
+});
+
 //Data is dict object
 var filter1 = function(data, key, value){
 	return Object.keys(data).filter(function(x){
@@ -101,7 +106,7 @@ var TaskSystem = (function(){
 				singleNodes = graph.getSingleNodes();
 				singleNodes.forEach(function(x){
 					sgraph = graph.get(x);
-					sgraph.func(sgraph.args)
+					graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
 				});
 				//throw new EmptyTaskException('This node has no tasks');
 			}else {
@@ -120,11 +125,13 @@ var TaskSystem = (function(){
 				var listofresults = nodes.map(function(x){ return graph.get(x)['result']});
 				var result = graph.get(x)['func'].apply(this, listofresults);
 				graph.update(x, 'result', result);	
-			})
+			});
 		}
-	}
+	},
+		result: function(value){
+			return gr.get(value).result;
+		}
 }
 })();
 
-module.exports = TaskSystem;
 
