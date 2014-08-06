@@ -1,3 +1,5 @@
+
+
 files = require('fs');
 http = require('http');
 
@@ -18,6 +20,10 @@ requirejs.config({
 
 var TaskSystem = requirejs('tasks')
 
+
+//Reserved actions for tasks
+var actions = ['readdir', 'remfile']
+
 //Чтение файла
 function readFile(name){
 	if(typeof name == 'string'){
@@ -36,6 +42,21 @@ function readFile(name){
 	}
 }
 
+var createdir = function(dirname){
+	mkdirp(dirname, function(e){
+			if(e){
+				throw "Error in create folder"
+			}
+		});
+}
+
+//Create folders and subfolders
+var folders = function(folder, subfolders){
+	createdir(folder);
+	subfolders.forEach(function(name){
+		createdir(folder + "/" + name);
+	});
+}
 
 function readFileHelpful(name){
 	try{
@@ -56,6 +77,8 @@ function readAllFiles(path){
 		return "error";
 	}
 }
+
+
 
 function logMessage(message){
 	return message;
@@ -147,13 +170,9 @@ Builder.prototype = {
 			this.fast.push(Response([readFile, path], this.named, 'read'));
 	},
 
-	mkdir: function(path, err){
+	mkdir: function(path, subdirs){
 		fast = this.fast;
-		mkdirp(path, function(e){
-			if(e){
-				this.fast.push([logMessage, message], this.named, 'create folders');
-			}
-		});
+		folders(path, subdirs);
 	},
 
 	//action with loaded data
@@ -187,6 +206,11 @@ Builder.prototype = {
 		this.fast.push(Action(writeFile, path, this.named));
 	},
 
+	//Append one task
+	task: function(action, func){
+
+	},
+
 	tasks: function(tasklist){
 		var tasksystem = new TaskSystem;
 		tasklist.forEach(function(x){
@@ -213,4 +237,3 @@ Builder.prototype = {
 		}
 	}
 }
-
