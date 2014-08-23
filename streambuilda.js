@@ -1,5 +1,4 @@
 
-
 files = require('fs');
 http = require('http');
 
@@ -208,11 +207,14 @@ Builder.prototype = {
 
 	//Append one task
 	task: function(action, func){
-
+		if(Object.keys(action).length == 0)
+			throw "Description of task is empty"
+		var tasksystem = new TaskSystem;
+		tasksystem.task(action, func)
 	},
 
 	tasks: function(tasklist){
-		var tasksystem = new TaskSystem;
+		var tasksystem = TaskSystem;
 		tasklist.forEach(function(x){
 			tasksystem.task(x);
 		});
@@ -237,3 +239,18 @@ Builder.prototype = {
 		}
 	}
 }
+
+
+//Load something from internet
+//http://nodejs.org/api/http.html
+function loadFromNet(path){
+
+}
+
+//Создание файла
+function createFile(path){
+	return function(){
+
+	};
+}
+
