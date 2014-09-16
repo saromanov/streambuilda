@@ -1,4 +1,5 @@
 
+
 files = require('fs');
 http = require('http');
 
@@ -12,12 +13,15 @@ var fastjs =  require('fast.js');
 	Promise = require('bluebird');
 	requirejs = require('requirejs')
 
+//https://github.com/nebulade/supererror
+require('supererror')
+
 requirejs.config({
     baseUrl: __dirname,
     nodeRequire: require
 });
 
-var TaskSystem = requirejs('tasks')
+var TaskSystem = requirejs('./tasks');
 
 
 //Reserved actions for tasks
@@ -73,6 +77,7 @@ function readAllFiles(path){
 		var data = files.readdirSync(path);
 		return readFile(data);
 	}catch(e){
+		console.error();
 		return "error";
 	}
 }
@@ -148,6 +153,7 @@ function Builder(name)
 	if(this.named == undefined)
 		this.named = "default";
 	this.fast = new FastList();
+	this.tasksystem = TaskSystem;
 }
 
 Builder.prototype = {
@@ -209,14 +215,12 @@ Builder.prototype = {
 	task: function(action, func){
 		if(Object.keys(action).length == 0)
 			throw "Description of task is empty"
-		var tasksystem = new TaskSystem;
-		tasksystem.task(action, func)
+		this.tasksystem.task(action, func)
 	},
 
 	tasks: function(tasklist){
-		var tasksystem = TaskSystem;
 		tasklist.forEach(function(x){
-			tasksystem.task(x);
+			this.tasksystem.task(x);
 		});
 	},
 
