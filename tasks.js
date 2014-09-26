@@ -1,6 +1,9 @@
 var async = require('async')
 	fs = require('fs')
 
+//http://underscorejs.ru/
+var _ = require('underscore')
+
 
 define(function(req){
 	return TaskSystem;
@@ -28,8 +31,8 @@ var TaskGraph = function(){
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
-			graph[array['name']] = {'count': Object.keys(array).length, 'type': 'complex', 
-			'nodes': array['tasks'], 'args': undefined, 'argsfrom':undefined, 'func': array['func']};
+			graph[array.name] = {'count': Object.keys(array).length, 'type': 'complex', 
+			'nodes': array.tasks, 'args': undefined, 'argsfrom':[array.argsfrom], 'func': array['func']};
 		},
 
 		_getNodes: function(nodes){
@@ -40,7 +43,7 @@ var TaskGraph = function(){
 			return obj;
 		},
 		get: function(node){
-			if(node in graph)
+			if(_.has(graph,node))
 				return graph[node];
 		},
 		data: function(){ return graph;},
@@ -53,13 +56,18 @@ var TaskGraph = function(){
 			return filter1(graph, 'type', 'single');
 		},
 
-		//Update node. For Ex: Set in result value
+		//Update node. For Ex: Set in result value (but not for async)
 		update: function(node, type, value){
 			if(node in graph){
 				var cnode = graph[node]
 				cnode[type] = value;
 				graph[node] = cnode;
 			}
+		},
+
+		//Update for async nodes
+		updateAsync: function(node, type, value){
+
 		}
 	}
 }
@@ -71,36 +79,51 @@ var TaskGraph = function(){
 
 var TaskSystem = (function(){
 	var gr = new TaskGraph();
+	//Reserved commands(as functions)
+	var commands = ['opendir', 'writefile', 'readfile', 'func'];
 	return {
 
 		/* Append new task. Task can be on two types: Single or parent.
 		arguments for task:
 		name - title of task
 		func - current function for task
+		commands from reserved list
 		*/
 
-		task: function(name,data){
+		task: function(){
 			var args = Array.prototype.slice.call(arguments, 0)[0];
-			if(Object.keys(args).length == 2)
-				gr.set(args['name'], args['func']);
-			else
-				gr.setParents(args)
+			var parnodes = args.connect;
+			var keys = Object.keys(args);
+			if(!_.isEmpty(parnodes)){
+				gr.setParents({'tasks': parnodes, 'name': args.name, 'argsfrom': args.argsfrom,
+								'func': args.func});
+			}
+			else if(keys.length == 2){
+				keys.forEach(function(x){
+					if(commands.indexOf(x) != -1)
+						gr.set(args.name, args[x]);
+				})
+				//gr.set(args['name'], args['func']);
+			}
 		},
 
 		//Append arguments
 		args: function(name){
 			var arg = Array.prototype.slice.call(arguments, 1)[0];
-			value = arg['value'];
-			if(value != undefined)
-				gr.update(name, 'args', value);
+			if(arg != undefined)
+				gr.update(name, 'args', arg);
 			var argsfrom = arg['argsfrom'];
 			if(argsfrom != undefined)
 				gr.update(name, 'argsfrom', argsfrom)
 		},
 
 		run: function(){
+
+			//Not for async events
 			var graph = gr;
+			var startnode = arguments[0];
 			var complexNodes = graph.getComplexNodes();
+			//Get "simple nodes" without parents
 			if(complexNodes.length == 0){
 				//Case without a complex nodes
 				singleNodes = graph.getSingleNodes();
@@ -110,27 +133,36 @@ var TaskSystem = (function(){
 				});
 				//throw new EmptyTaskException('This node has no tasks');
 			}else {
+			//lookup nodes with childrens
 			complexNodes.forEach(function(x){
 				var nodes = graph.get(x)['nodes'];
 				nodes.forEach(function(y){
 					var singlenode = graph.get(y);
-					if(singlenode.result == undefined){
-						var result = singlenode.func(singlenode.args);
-						graph.update(singlenode.name, 'result', result);
+					if(singlenode != undefined){
+						var result = singlenode.func.apply(this, singlenode.args);
+						//TODO: Weak place(Need async solution)
+						graph.update(y, 'result', result);
 					}
 				});
 
 				//Use result in list of nodes
+				//Merge arguments from argsfrom and args
 				var nodes = graph.get(x)['argsfrom'];
-				var listofresults = nodes.map(function(x){ return graph.get(x)['result']});
-				var result = graph.get(x)['func'].apply(this, listofresults);
-				graph.update(x, 'result', result);	
+				if(nodes != undefined){
+					var listofresults = nodes.map(function(v){ return graph.get(v)['result']});
+					var result = graph.get(x)['func'].apply(this, listofresults);
+					graph.update(x, 'result', result);
+				}	
 			});
 		}
 	},
-		result: function(value){
+	result: function(value){
 			return gr.get(value).result;
-		}
+	},
+
+	runAsync: function(){
+		var graph = gr
+	}
 }
 })();
 
