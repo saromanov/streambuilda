@@ -4,6 +4,7 @@ var async = require('async')
 //http://underscorejs.ru/
 var _ = require('underscore')
 
+//Check https://www.promisejs.org/
 
 define(function(req){
 	return TaskSystem;
@@ -100,8 +101,11 @@ var TaskSystem = (function(){
 			}
 			else if(keys.length == 2){
 				keys.forEach(function(x){
-					if(commands.indexOf(x) != -1)
+					commandidx = commands.indexOf(x);
+					if(commandidx != -1)
 						gr.set(args.name, args[x]);
+					else
+						gr.set(args.name, commands[commandidx]);
 				})
 				//gr.set(args['name'], args['func']);
 			}
@@ -124,10 +128,10 @@ var TaskSystem = (function(){
 			var startnode = arguments[0];
 			var complexNodes = graph.getComplexNodes();
 			//Get "simple nodes" without parents
-			if(complexNodes.length == 0){
+			if(_.isEmpty(complexNodes)){
 				//Case without a complex nodes
 				singleNodes = graph.getSingleNodes();
-				singleNodes.forEach(function(x){
+				_.each(singleNodes, function(x){
 					sgraph = graph.get(x);
 					graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
 				});
@@ -136,6 +140,7 @@ var TaskSystem = (function(){
 			//lookup nodes with childrens
 			complexNodes.forEach(function(x){
 				var nodes = graph.get(x)['nodes'];
+				//console.log(_.all(function(x){ return graphget(x).result != undefined;}, nodes))
 				nodes.forEach(function(y){
 					var singlenode = graph.get(y);
 					if(singlenode != undefined){
@@ -162,6 +167,10 @@ var TaskSystem = (function(){
 
 	runAsync: function(){
 		var graph = gr
+		var complex = graph.getComplexNodes()
+		if(_.isEmpty(complexNodes)){
+			var promise = Q.promise();
+		}
 	}
 }
 })();
