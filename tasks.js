@@ -1,5 +1,7 @@
 var async = require('async')
 	fs = require('fs')
+	comm = require('commands')
+	Q = require('q')
 
 //http://underscorejs.ru/
 var _ = require('underscore')
@@ -24,16 +26,20 @@ function EmptyTaskException(message) {
 var TaskGraph = function(){
 	var graph = {};
 	return {
-		set: function(name, func){
-			var append = {'name': name, 'func': func, result:undefined, 'type':'single', 
-			'args': undefined};
-			graph[name] = append;
+		set: function(data){
+			if(data.name != undefined){
+				var append = {name: data.name, func: data.func, result:undefined, type:'single', 
+								args: undefined, async:data.async};
+				graph[data.name] = append;
+			}
 		},
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
-			graph[array.name] = {'count': Object.keys(array).length, 'type': 'complex', 
+			if(array.args != undefined){
+				graph[array.name] = {'count': Object.keys(array).length, 'type': 'complex', 
 			'nodes': array.tasks, 'args': undefined, 'argsfrom':[array.argsfrom], 'func': array['func']};
+			}
 		},
 
 		_getNodes: function(nodes){
@@ -81,7 +87,7 @@ var TaskGraph = function(){
 var TaskSystem = (function(){
 	var gr = new TaskGraph();
 	//Reserved commands(as functions)
-	var commands = ['opendir', 'writefile', 'readfile', 'func'];
+	var commands = ['opendir', 'writefile', 'readfile', 'createdir'];
 	return {
 
 		/* Append new task. Task can be on two types: Single or parent.
@@ -99,15 +105,15 @@ var TaskSystem = (function(){
 				gr.setParents({'tasks': parnodes, 'name': args.name, 'argsfrom': args.argsfrom,
 								'func': args.func});
 			}
-			else if(keys.length == 2){
-				keys.forEach(function(x){
-					commandidx = commands.indexOf(x);
-					if(commandidx != -1)
-						gr.set(args.name, args[x]);
-					else
-						gr.set(args.name, commands[commandidx]);
-				})
-				//gr.set(args['name'], args['func']);
+			else{
+				var data = {name: args.name, async:args.async};
+				var commidx = commands.indexOf(args.func);
+				if(commidx != -1){
+					data = _.extend(data, {func: comm[commands[commidx]]})
+				}
+				else
+					data = _.extend(data, {func: args.func});
+				gr.set(data);
 			}
 		},
 
@@ -133,7 +139,14 @@ var TaskSystem = (function(){
 				singleNodes = graph.getSingleNodes();
 				_.each(singleNodes, function(x){
 					sgraph = graph.get(x);
-					graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
+					if(sgraph.async){
+						Q.fcall(sgraph.func, sgraph.args).then(function(result){
+							graph.update(x, 'result', result);
+						}).done();
+					}
+					else{
+						graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
+					}
 				});
 				//throw new EmptyTaskException('This node has no tasks');
 			}else {
@@ -167,9 +180,12 @@ var TaskSystem = (function(){
 
 	runAsync: function(){
 		var graph = gr
-		var complex = graph.getComplexNodes()
-		if(_.isEmpty(complexNodes)){
-			var promise = Q.promise();
+		var simple = graph.getSingleNodes();
+		if(!_.isEmpty(simple)){
+			_.each(simple, function(x){
+				var node = graph.get(x);
+				console.log("THIS IS: ", node.name, node.func('tasks.js'));
+			})
 		}
 	}
 }
