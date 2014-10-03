@@ -181,12 +181,15 @@ var TaskSystem = (function(){
 	//All tasks run async. Not pay attention to async flag
 	runAsync: function(){
 		var graph = gr
+		var args = Array.prototype.slice.call(arguments)
 		var simple = graph.getSingleNodes();
 		if(!_.isEmpty(simple)){
 			_.each(simple, function(x){
 				var node = graph.get(x);
-				q.fcall(node.func('tasks.js'), node.argsfrom).then(function(x){
-					console.log("Task is complete");
+				q.fcall(node.func, 4).then(function(x){
+					if(args.indexOf('logs') != -1)
+						console.log("Task " + node.name + " is complete");
+					graph.update(x, 'result', result)
 				});
 			})
 		}
