@@ -178,13 +178,24 @@ var TaskSystem = (function(){
 			return gr.get(value).result;
 	},
 
+	//All tasks run async. Not pay attention to async flag
 	runAsync: function(){
 		var graph = gr
 		var simple = graph.getSingleNodes();
 		if(!_.isEmpty(simple)){
 			_.each(simple, function(x){
 				var node = graph.get(x);
-				console.log("THIS IS: ", node.name, node.func('tasks.js'));
+				q.fcall(node.func('tasks.js'), node.argsfrom).then(function(x){
+					console.log("Task is complete");
+				});
+			})
+		}
+
+		var complex = graph.getComplexNodes();
+		if(!_.isEmpty(complex)){
+			_.each(complex, function(x){
+				var tasks = graph.get(x).nodes;
+
 			})
 		}
 	}
