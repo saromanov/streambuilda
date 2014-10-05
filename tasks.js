@@ -36,10 +36,12 @@ var TaskGraph = function(){
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
-			if(array.args != undefined){
+			if(array.argsfrom == undefined)
+				throw "Not found argsfrom param"
+			//if(array.args != undefined){
 				graph[array.name] = {'count': Object.keys(array).length, 'type': 'complex', 
 			'nodes': array.tasks, 'args': undefined, 'argsfrom':[array.argsfrom], 'func': array['func']};
-			}
+			//}
 		},
 
 		_getNodes: function(nodes){
@@ -174,6 +176,8 @@ var TaskSystem = (function(){
 			});
 		}
 	},
+
+	//Only for "sync tasks"
 	result: function(value){
 			return gr.get(value).result;
 	},
