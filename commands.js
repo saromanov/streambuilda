@@ -1,5 +1,7 @@
 var fs = require('fs')
 	q = require('q')
+	//https://github.com/paulmillr/chokidar
+	chokidar = require('chokidar')
 
 
 define(function(req){
@@ -30,8 +32,21 @@ var Commands = (function(){
 
 		},
 
-		wrirefile: function(path){
+		writefile: function(path, data){
+			fs.writeFileSync(path, data, 'utf-8')
+		},
 
+		writefileA: function(path, data){
+			q.fcall(fs.writeFile, path, data, 'utf-8').then(function(responce){
+
+			}).done()
+		},
+		watchChanges: function(path, action){
+			var watcher = chokidar.watch('streambuilda.js', {persistent: true});
+			watcher.on('change', function(path){
+			action == undefined?console.log('File', path, 'has been change'): action(path);
+			})
 		}
+
 	}
 })()

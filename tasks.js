@@ -23,6 +23,11 @@ function EmptyTaskException(message) {
    this.name = "EmptyListException";
 }
 
+function SomethingException(message){
+	this.message = message
+	this.name = "SomethingWentWrongException";
+}
+
 var TaskGraph = function(){
 	var graph = {};
 	return {
@@ -97,6 +102,7 @@ var TaskSystem = (function(){
 		name - title of task
 		func - current function for task
 		commands from reserved list
+		argsfrom - results from past tasks
 		*/
 
 		task: function(){
@@ -115,13 +121,22 @@ var TaskSystem = (function(){
 				}
 				else
 					data = _.extend(data, {func: args.func});
+				if(data['func'] == undefined){
+					message = "Something Went Wrong and function in task '" + data.name + "' is undefined"
+					throw new SomethingException(message);
+				}
 				gr.set(data);
 			}
 		},
 
 		//Append arguments
+		/*
+			task.args(taskname, arguments)
+			arguments in list
+		*/
 		args: function(name){
 			var arg = Array.prototype.slice.call(arguments, 1)[0];
+			console.log(arg);
 			if(arg != undefined)
 				gr.update(name, 'args', arg);
 			var argsfrom = arg['argsfrom'];
@@ -147,6 +162,10 @@ var TaskSystem = (function(){
 						}).done();
 					}
 					else{
+						if(sgraph.args == undefined){
+							message = "Something Went Wrong and arguments in task '" + sgraph.name + "' is undefined"
+							throw new SomethingException(message);
+						}
 						graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
 					}
 				});
