@@ -1,65 +1,31 @@
 
-
 files = require('fs');
 http = require('http');
-
 //https://www.npmjs.org/package/fast-list
 var FastList = require('fast-list');
 var Parallel = require('paralleljs');
 //https://github.com/codemix/fast.js
-var fastjs =  require('fast.js');
-	//https://github.com/substack/node-mkdirp
-	mkdirp = require('mkdirp');
-	Promise = require('bluebird');
-	requirejs = require('requirejs')
+var fastjs = require('fast.js');
+//https://github.com/substack/node-mkdirp
+			mkdirp = require('mkdirp');
+			Promise = require('bluebird');
+			requirejs = require('requirejs')
+			chokidar = require('chokidar')
+			//https://github.com/nebulade/supererror
+			require('supererror')
+			Q = require('q')
 
-//https://github.com/nebulade/supererror
-require('supererror')
+
 
 requirejs.config({
-    baseUrl: __dirname,
-    nodeRequire: require
+baseUrl: __dirname,
+nodeRequire: require
 });
 
 var TaskSystem = requirejs('./tasks');
+var Commands = requirejs('./commands')
 
 
-//Reserved actions for tasks
-var actions = ['readdir', 'remfile']
-
-//Чтение файла
-function readFile(name){
-	if(typeof name == 'string'){
-		return readFileHelpful(name);
-	}
-	else
-	{
-		var result = '';
-		for(var n in name){
-			value = readFileHelpful(name[n]);
-			if(value != 'error'){
-				result += value + '\n';
-			}
-		}
-		return result;
-	}
-}
-
-var createdir = function(dirname){
-	mkdirp(dirname, function(e){
-			if(e){
-				throw "Error in create folder"
-			}
-		});
-}
-
-//Create folders and subfolders
-var folders = function(folder, subfolders){
-	createdir(folder);
-	subfolders.forEach(function(name){
-		createdir(folder + "/" + name);
-	});
-}
 
 function readFileHelpful(name){
 	try{
@@ -88,17 +54,6 @@ function logMessage(message){
 	return message;
 }
 
-function readFileAsync(name){
-	var content = 'a';
-	files.readFileSync(name, {encoding: 'utf-8'}, function(err, data){
-		if(err)
-			console.log("Something error");
-		else{
-			console.log('VALUE: ' + content);
-			content = data.toString();
-		}
-	});
-}
 
 function loadModules(modules){
 	var result = [];
@@ -114,11 +69,6 @@ function loadModules(modules){
 	return result;
 }
 
-function writeFile(path, data){
-	files.writeFile(path, data, function(err){
-		if(err)console.log(err);
-	});
-}
 
 function createData(data){
 	var f = data['files'];
@@ -131,14 +81,9 @@ function createData(data){
 }
 
 
-function Response(data, name, action){
-	return {"action":action, "time":new Date(), "result": data[0](data[1]), 
-		   "path": data[1],
-		   "name": name, 'type':'response'};
-}
 
-function Action(action, path, name){
-	return {'type':'action', "func": action, "path": path, "time":new Date(), 'name':name}
+var TaskWait = function(task){
+
 }
 
 
@@ -147,99 +92,72 @@ function Store(){
 	var readStorage = '';
 }
 
-function Builder(name)
-{
-	this.named = name
-	if(this.named == undefined)
-		this.named = "default";
-	this.fast = new FastList();
-	this.tasksystem = TaskSystem;
+
+var Builder2 = function(){
+	return {
+		log: function(message, func){
+			console.log(message);
+			if(func != undefined){
+				console.log("YES");
+			}
+		},
+
+		read: function(item){
+
+		},
+
+		run: function(){
+			console.log(fast.pop())
+		}
+	}
+
 }
 
-Builder.prototype = {
-	/*
-		read data for several ways:
-		read('path.js') => set in storage data from path.js
-		read(['path1.js', 'path2.js']) => merge data from two files
-		read('.') => read all files in dir
-	*/
 
-	create: function(data){
-		
-	},
+//All tasks run as async
+//All events waitings for start
+var BuilderAsync = function(){
+	var comm = {}
+	return {
+		log: function(message){
+			console.log(message)
+		},
+		read: function(data){
+			comm[data.name] = Commands['checkPathsExist'];
+		},
 
-	read: function(path){
-		if(path[path.length-1] == '.')
-			this.fast.push(Response([readAllFiles, path], this.named, 'read'));
-		else
-			this.fast.push(Response([readFile, path], this.named, 'read'));
-	},
+		exisis: function(data){
+			comm[data.name] = data.action;
+		},
 
-	mkdir: function(path, subdirs){
-		fast = this.fast;
-		folders(path, subdirs);
-	},
+		compress: function(data){
+			comm[data.name] = Commands['compress']
+		}, 
+		//user event
+		event: function(data){
 
-	//action with loaded data
-	action: function(func){
-		this.fast.push(Action(func, this.named, 'action'));
-	},
+		},
+		task: function(data){
 
+		},
 
-	/*
-		Write simple log message
-		log("message") => >message
-	*/
+		watch: function(path){
+			comm[data.name] = Commands['watch']
+		}, 
 
-	log: function(message){
-		this.fast.push(Response([logMessage, message], this.named, 'log message'));
-	},
+		run: function(data){
+			if(data.length > 0){
+				console.log(data);
 
-	//List of modules
-	modules: function(lmodules){
-		this.fast.push(Response([loadModules, lmodules], this.named, 'load modules'));
-	},
-
-	//TODO:Compine two js files;
-	links: function(files){
-
-	},
-
-	//TODO:Check run files
-
-	write: function(path){
-		this.fast.push(Action(writeFile, path, this.named));
-	},
-
-	//Append one task
-	task: function(action, func){
-		if(Object.keys(action).length == 0)
-			throw "Description of task is empty"
-		this.tasksystem.task(action, func)
-	},
-
-	tasks: function(tasklist){
-		tasklist.forEach(function(x){
-			this.tasksystem.task(x);
-		});
-	},
-
-	//run all events
-	run: function(){
-		var store = new Store();
-		var queue = new FastList();
-		for(var i = 0; i <=this.fast.length;++i){
-			var lst = this.fast.shift();
-			if(lst['type'] == 'response')
-			{
-					if(lst['action'] == 'read'){
-						queue.push(lst['result']);
-					}
 			}
-			if(lst['type'] == 'action')
-			{
-				lst['func'](lst['path'], queue.pop());
-			}
+		},
+
+		//run data as sequence(every args from last event to next)
+		seq: function(data, initval){
+			var result = Q(initval)
+			data.forEach(function(f){
+				result = result.then(comm[f]);
+			})
 		}
 	}
 }
@@ -257,4 +175,3 @@ function createFile(path){
 
 	};
 }
-

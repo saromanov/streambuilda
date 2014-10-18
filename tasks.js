@@ -45,7 +45,8 @@ var TaskGraph = function(){
 				throw "Not found argsfrom param"
 			//if(array.args != undefined){
 				graph[array.name] = {'count': Object.keys(array).length, 'type': 'complex', 
-			'nodes': array.tasks, 'args': undefined, 'argsfrom':[array.argsfrom], 'func': array['func']};
+			'nodes': array.tasks, 'args': undefined, 'argsfrom':[array.argsfrom], 'func': array['func'],
+			'constraints': array.constraints};
 			//}
 		},
 
@@ -105,13 +106,14 @@ var TaskSystem = (function(){
 		argsfrom - results from past tasks
 		*/
 
+		//TODO: Append inner tasks
 		task: function(){
 			var args = Array.prototype.slice.call(arguments, 0)[0];
 			var parnodes = args.connect;
 			var keys = Object.keys(args);
 			if(!_.isEmpty(parnodes)){
 				gr.setParents({'tasks': parnodes, 'name': args.name, 'argsfrom': args.argsfrom,
-								'func': args.func});
+								'func': args.func, constraints:args.constraints});
 			}
 			else{
 				var data = {name: args.name, async:args.async};
@@ -179,8 +181,30 @@ var TaskSystem = (function(){
 					var singlenode = graph.get(y);
 					if(singlenode != undefined){
 						var result = singlenode.func.apply(this, singlenode.args);
+						//console.log(nodes)
 						//TODO: Weak place(Need async solution)
-						graph.update(y, 'result', result);
+
+						//Now constraints only for numbers
+						var constraints = graph.get(x).constraints;
+						if(_.isUndefined(constraints) == false){
+							var keys = Object.keys(constraints)
+							if(keys.indexOf(y) != -1){
+								if(_.isObject(constraints[y])){
+									var data = constraints[y];
+									if(result >= data.min && result <= data.max)
+										graph.update(y, 'result', result);
+								}
+								else{
+									if(result == constraints[y])
+										graph.update(y, 'result', result);
+								}
+							}
+							else
+								graph.update(y, 'result', result);
+						}
+						else{
+							graph.update(y, 'result', result);
+						}
 					}
 				});
 
@@ -188,7 +212,7 @@ var TaskSystem = (function(){
 				//Merge arguments from argsfrom and args
 				var nodes = graph.get(x)['argsfrom'];
 				if(nodes != undefined){
-					var listofresults = nodes.map(function(v){ return graph.get(v)['result']});
+					var listofresults = nodes.map(function(v){ return graph.get(v).result});
 					var result = graph.get(x)['func'].apply(this, listofresults);
 					graph.update(x, 'result', result);
 				}	
