@@ -14,6 +14,8 @@ var fastjs = require('fast.js');
 			//https://github.com/nebulade/supererror
 			require('supererror')
 			Q = require('q')
+			//https://www.npmjs.org/package/node-serialize
+			serialize = require('node-serialize');
 
 
 
@@ -113,11 +115,25 @@ var Builder2 = function(){
 
 }
 
+var readSerializeFuncs = function(dirname){
+	var serializeFuncs = {}
+	try {
+			fs.readdirSync(dirname).map(function(path){
+			var result = JSON.parse(fs.readFileSync(dirname + path, 'utf-8'));
+			serializeFuncs[result.name] = serialize.unserialize(result)
+		});
+
+	}catch(ex){
+		return {}
+	}
+	return serializeFuncs;
+}
+
 
 //All tasks run as async
 //All events waitings for start
 var BuilderAsync = function(){
-	var comm = {}
+	var serializeFuncs = readSerializeFuncs("./funcs/");
 	return {
 		log: function(message){
 			console.log(message)
@@ -144,6 +160,24 @@ var BuilderAsync = function(){
 		watch: function(path){
 			comm[data.name] = Commands['watch']
 		}, 
+
+		registerFunction: function(title, func){
+			var obj = {
+				name: title,
+				say: func
+			}
+
+			if(process.platform == 'win')
+				dirname = ".\\funcs"
+			var result = serialize.serialize(obj);
+			fs.exists(dirname, function(ex){
+				if(!ex)
+					mkdirp(dirname, function(a){})
+				console.log("Write data to: ", dirname + title + ".json")
+				fs.writeFile(dirname + title + ".json", result, 
+					function(res){});
+			});
+		},
 
 		run: function(data){
 			if(data.length > 0){
