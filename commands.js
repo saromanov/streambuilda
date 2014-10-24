@@ -2,12 +2,15 @@ var fs = require('fs')
 	q = require('q')
 	//https://github.com/paulmillr/chokidar
 	chokidar = require('chokidar')
-	compressor = require('node-minify');
+	compressor = require('node-minify')
+	nodeunit = require('nodeunit').reporters.default;
 
 
 define(function(req){
 	return Commands
 });
+
+
 var Commands = (function(){
 
 	return {
@@ -94,6 +97,13 @@ var Commands = (function(){
 				throw "Error in create folder"
 			}
 			});
+		},
+
+		//Test data
+		//path - list of files ot path with files(also as list)
+		testing: function(path){
+			if(typeof path == 'object' && path.length > 0)
+				nodeunit.run(path)
 		}
 
 	}

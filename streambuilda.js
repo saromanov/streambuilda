@@ -110,6 +110,10 @@ var Builder2 = function(){
 
 		run: function(){
 			console.log(fast.pop())
+		},
+
+		task: function(item){
+
 		}
 	}
 
@@ -120,7 +124,7 @@ var readSerializeFuncs = function(dirname){
 	try {
 			fs.readdirSync(dirname).map(function(path){
 			var result = JSON.parse(fs.readFileSync(dirname + path, 'utf-8'));
-			serializeFuncs[result.name] = serialize.unserialize(result)
+			serializeFuncs[result.name] = serialize.unserialize(result).say
 		});
 
 	}catch(ex){
@@ -134,6 +138,7 @@ var readSerializeFuncs = function(dirname){
 //All events waitings for start
 var BuilderAsync = function(){
 	var serializeFuncs = readSerializeFuncs("./funcs/");
+	console.log(serializeFuncs)
 	return {
 		log: function(message){
 			console.log(message)
@@ -154,7 +159,7 @@ var BuilderAsync = function(){
 
 		},
 		task: function(data){
-
+			console.log(data)
 		},
 
 		watch: function(path){
