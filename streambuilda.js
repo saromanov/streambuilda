@@ -136,11 +136,13 @@ var readSerializeFuncs = function(dirname){
 
 //All tasks run as async
 //All events waitings for start
-var BuilderAsync = function(){
+var BuilderAsync = function(params){
+	console.log(params)
 	var serializeFuncs = readSerializeFuncs("./funcs/");
-	console.log(serializeFuncs)
+	var tasks = []
 	return {
 		log: function(message){
+			//Basic log message
 			console.log(message)
 		},
 		read: function(data){
@@ -159,7 +161,11 @@ var BuilderAsync = function(){
 
 		},
 		task: function(data){
-			console.log(data)
+			tasks.push(data)
+		},
+
+		tasks: function(name, data){
+
 		},
 
 		watch: function(path){

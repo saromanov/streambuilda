@@ -28,7 +28,7 @@ var Commands = (function(){
 
 		readfile: function(path){
 			q.fcall(fs.readFile, path, 'utf-8').then(function(result){
-				console.log("THIS IS RES", result);
+				console.log(result);
 			}).done()
 		},
 		/*
@@ -104,6 +104,26 @@ var Commands = (function(){
 		testing: function(path){
 			if(typeof path == 'object' && path.length > 0)
 				nodeunit.run(path)
+			if (typeof path == 'string'){
+				fs.exists(path, function(resp){
+					if(!resp)
+						console.log("Error: " + path + " not exist");
+					else{
+						nodeunit.run([path])
+					}
+				})
+			}
+		},
+
+		//join paths in file in one file
+		join: function(paths, target){
+			if(paths.length > 0){
+				paths.map(function(path){
+					q.fcall(fs.readFile, path).then(function(data, value){
+						console.log(data)
+					}).done()
+				})
+			}
 		}
 
 	}
