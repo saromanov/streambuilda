@@ -26,11 +26,11 @@ var Commands = (function(){
 
 		},
 
-		readfile: function(path){
+		/*readfile: function(path){
 			q.fcall(fs.readFile, path, 'utf-8').then(function(result){
 				console.log(result);
 			}).done()
-		},
+		},*/
 		/*
 		  input: list of paths
 		  Return files, which exist
@@ -60,7 +60,11 @@ var Commands = (function(){
 		},
 
 		readfile: function(path){
-			return fs.readFileSync(path, 'utf-8')
+			return {
+				run: function(){
+					return fs.readFileSync(path, 'utf-8')
+				}
+			}
 		},
 
 		writefile: function(path, data){
@@ -102,16 +106,21 @@ var Commands = (function(){
 		//Test data
 		//path - list of files ot path with files(also as list)
 		testing: function(path){
-			if(typeof path == 'object' && path.length > 0)
-				nodeunit.run(path)
-			if (typeof path == 'string'){
-				fs.exists(path, function(resp){
-					if(!resp)
-						console.log("Error: " + path + " not exist");
-					else{
-						nodeunit.run([path])
+			return {
+				//User task 
+				run: function(){
+					if(typeof path == 'object' && path.length > 0){
+						nodeunit.run(path)
+						return true
 					}
-				})
+					if (typeof path == 'string'){
+						if(fs.existsSync(path)){
+							nodeunit.run([path]);
+							return true;
+						}
+					}
+					return false;
+				}
 			}
 		},
 

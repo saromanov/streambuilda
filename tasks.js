@@ -2,6 +2,7 @@ var async = require('async')
 	fs = require('fs')
 	comm = require('commands')
 	Q = require('q')
+	
 
 //http://underscorejs.ru/
 var _ = require('underscore')
@@ -41,8 +42,8 @@ var TaskGraph = function(){
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
-			if(array.argsfrom == undefined)
-				throw "Not found argsfrom param"
+			/*if(array.argsfrom == undefined)
+				throw "Not found argsfrom param"*/
 			//if(array.args != undefined){
 				graph[array.name] = {'count': Object.keys(array).length, 'type': 'complex', 
 			'nodes': array.tasks, 'args': undefined, 'argsfrom':[array.argsfrom], 'func': array['func'],
@@ -135,10 +136,10 @@ var TaskSystem = (function(){
 		/*
 			task.args(taskname, arguments)
 			arguments in list
+			option param
 		*/
 		args: function(name){
 			var arg = Array.prototype.slice.call(arguments, 1)[0];
-			console.log(arg);
 			if(arg != undefined)
 				gr.update(name, 'args', arg);
 			var argsfrom = arg['argsfrom'];
@@ -245,7 +246,27 @@ var TaskSystem = (function(){
 		if(!_.isEmpty(complex)){
 			_.each(complex, function(x){
 				var tasks = graph.get(x).nodes;
+				console.log("THIS IS TASKS: ", tasks)
+			})
+		}
+	},
 
+	runAsync2: function(){
+		var graph = gr
+		var complex = graph.getComplexNodes()
+		if(!_.isEmpty(complex)){
+			_.each(complex, function(parnode){
+				var tasks = graph.get(parnode).nodes
+				/*_.each(tasks, function(x){ 
+					q.fcall(graph.get(x).func).then(function(res){
+						console.log("THIS IS RES: ", res)
+					})
+				})*/
+
+				q.allSettled(tasks.map(function(task){ return graph.get(task).func()}))
+				 .then(function(res){
+				 	//run parent task
+				 })
 			})
 		}
 	}

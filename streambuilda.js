@@ -140,6 +140,7 @@ var BuilderAsync = function(params){
 	console.log(params)
 	var serializeFuncs = readSerializeFuncs("./funcs/");
 	var tasks = []
+	var task = TaskSystem;
 	return {
 		log: function(message){
 			//Basic log message
@@ -160,7 +161,9 @@ var BuilderAsync = function(params){
 		event: function(data){
 
 		},
-		task: function(data){
+
+		//By default is async task
+		task: function(tasktitle, data){
 			tasks.push(data)
 		},
 
@@ -191,9 +194,12 @@ var BuilderAsync = function(params){
 		},
 
 		run: function(data){
-			if(data.length > 0){
-				console.log(data);
-
+			if(tasks.length > 0){
+				tasks.forEach(function(task){
+					q.fcall(task.run).then(function(res){
+						
+					}).done()
+				})
 			}
 		},
 
