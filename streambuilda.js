@@ -1,4 +1,3 @@
-
 files = require('fs');
 http = require('http');
 //https://www.npmjs.org/package/fast-list
@@ -137,7 +136,6 @@ var readSerializeFuncs = function(dirname){
 //All tasks run as async
 //All events waitings for start
 var BuilderAsync = function(params){
-	console.log(params)
 	var serializeFuncs = readSerializeFuncs("./funcs/");
 	var tasks = []
 	var task = TaskSystem;
@@ -164,6 +162,7 @@ var BuilderAsync = function(params){
 
 		//By default is async task
 		task: function(tasktitle, data){
+			console.log("MYDATA: ", data.length)
 			tasks.push(data)
 		},
 
@@ -175,19 +174,20 @@ var BuilderAsync = function(params){
 			comm[data.name] = Commands['watch']
 		}, 
 
+		//Serialization user function to ./funcs
 		registerFunction: function(title, func){
 			var obj = {
 				name: title,
 				say: func
 			}
-
+			var dirname = './funcs/'
 			if(process.platform == 'win')
 				dirname = ".\\funcs"
 			var result = serialize.serialize(obj);
 			fs.exists(dirname, function(ex){
 				if(!ex)
 					mkdirp(dirname, function(a){})
-				console.log("Write data to: ", dirname + title + ".json")
+				console.log("Serialize new function to: ", dirname + title + ".json")
 				fs.writeFile(dirname + title + ".json", result, 
 					function(res){});
 			});
@@ -196,9 +196,16 @@ var BuilderAsync = function(params){
 		run: function(data){
 			if(tasks.length > 0){
 				tasks.forEach(function(task){
-					q.fcall(task.run).then(function(res){
-						
-					}).done()
+					if(task.length == undefined)
+						q.fcall(task.run).then(function(res){
+						}).done()
+					else{
+						task.forEach(function(innertask){
+							q.fcall(innertask.run).then(function(res){
+
+							}).done()
+						})
+					}
 				})
 			}
 		},
@@ -207,7 +214,10 @@ var BuilderAsync = function(params){
 		seq: function(data, initval){
 			var result = Q(initval)
 			data.forEach(function(f){
-				result = result.then(comm[f]);
+				if (f in serializeFuncs)
+					result = result.then(serializeFuncs[f]);
+			    else
+					result = result.then(comm[f]);
 			})
 		}
 	}

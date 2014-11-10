@@ -4,6 +4,7 @@ var fs = require('fs')
 	chokidar = require('chokidar')
 	compressor = require('node-minify')
 	nodeunit = require('nodeunit').reporters.default;
+	jshint = require('jshint')
 
 
 define(function(req){
@@ -105,6 +106,7 @@ var Commands = (function(){
 
 		//Test data
 		//path - list of files ot path with files(also as list)
+		// But this is not async version
 		testing: function(path){
 			return {
 				//User task 
@@ -132,6 +134,15 @@ var Commands = (function(){
 						console.log(data)
 					}).done()
 				})
+			}
+		},
+		jshint: function(paths){
+			return {
+				run: function(){
+					if(typeof path == 'object' && path.length > 0){
+
+					}
+				}
 			}
 		}
 
