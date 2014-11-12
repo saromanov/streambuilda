@@ -4,7 +4,10 @@ var fs = require('fs')
 	chokidar = require('chokidar')
 	compressor = require('node-minify')
 	nodeunit = require('nodeunit').reporters.default;
-	jshint = require('jshint')
+	jshint = require('jshint').JSHINT
+
+	//https://github.com/jshint/fixmyjs
+	fixmyjs = require('fixmyjs')
 
 
 define(function(req){
@@ -136,12 +139,39 @@ var Commands = (function(){
 				})
 			}
 		},
+
 		jshint: function(paths){
 			return {
 				run: function(){
-					if(typeof path == 'object' && path.length > 0){
+					if(typeof paths == 'string'){
+						fs.readFile(paths, 'utf-8', function(err, data){
+							if(jshint(data.toString())){
+								console.log("File " + paths + " not contain errors")
+								return true;
+							}
 
+							jshint.data().errors.forEach(function(errordata){
+								if(errordata != null)
+									console.log(errordata.line + " " + errordata.raw);
+							})
+						})
 					}
+					return false;
+				}
+			}
+		},
+
+		fixmyjs: function(paths){
+			return {
+				run: function(){
+					if(typeof paths == 'string'){
+						fs.readFile(paths, 'utf-8', function(err, data){
+							var src = data.toString();
+							jshint(src)
+							var stringFixedCode = fixmyjs(jshint.data(), src).run();
+						})
+					}
+					return false;
 				}
 			}
 		}
