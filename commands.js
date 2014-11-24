@@ -8,6 +8,7 @@ var fs = require('fs')
 
 	//https://github.com/jshint/fixmyjs
 	fixmyjs = require('fixmyjs')
+	gm = require('gm').subClass({imageMagick:true})
 
 
 define(function(req){
@@ -152,6 +153,7 @@ var Commands = (function(){
 
 							jshint.data().errors.forEach(function(errordata){
 								if(errordata != null)
+									console.log("FILE: " + paths)
 									console.log(errordata.line + " " + errordata.raw);
 							})
 						})
@@ -161,20 +163,46 @@ var Commands = (function(){
 			}
 		},
 
+		//Task with FixMyJS
 		fixmyjs: function(paths){
 			return {
 				run: function(){
 					if(typeof paths == 'string'){
-						fs.readFile(paths, 'utf-8', function(err, data){
-							var src = data.toString();
-							jshint(src)
-							var stringFixedCode = fixmyjs(jshint.data(), src).run();
+						FixMyJSLoader(paths);
+					}
+					else if(typeof paths == 'object'){
+						paths.forEach(function(path){
+							FixMyJSLoader(path);
 						})
 					}
 					return false;
+				}
+			}
+		},
+
+		//Manipulating with images(resize)
+		img: function(paths){
+			return{
+				run: function(){
+					gm(paths)
+						.resize(25,25)
+						.autoOrient()
+						.write(paths, function(err, out, stderr){
+							console.log("Found error in write image");
+						})
 				}
 			}
 		}
 
 	}
 })()
+
+
+var FixMyJSLoader = function(paths){
+	fs.readFile(paths, 'utf-8', function(err, data){
+		var src = data.toString();
+		jshint(src)
+		var stringFixedCode = fixmyjs(jshint.data(), src).run();
+		console.log("Code on path: " + paths)
+	})
+}
