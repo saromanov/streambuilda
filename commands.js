@@ -188,7 +188,8 @@ var Commands = (function(){
 						.resize(25,25)
 						.autoOrient()
 						.write(paths, function(err, out, stderr){
-							console.log("Found error in write image");
+							if (err != undefined)
+								console.log("Found error in write image", err);
 						})
 				}
 			}

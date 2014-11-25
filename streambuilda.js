@@ -1,3 +1,5 @@
+
+
 files = require('fs');
 http = require('http');
 //https://www.npmjs.org/package/fast-list
@@ -138,6 +140,7 @@ var readSerializeFuncs = function(dirname){
 var BuilderAsync = function(params){
 	var serializeFuncs = readSerializeFuncs("./funcs/");
 	var tasks = []
+	var taskNames = {}
 	var task = TaskSystem;
 	return {
 		log: function(message){
@@ -162,8 +165,8 @@ var BuilderAsync = function(params){
 
 		//By default is async task
 		task: function(tasktitle, data){
-			console.log("MYDATA: ", data.length)
 			tasks.push(data)
+			taskNames[tasktitle] = data
 		},
 
 		tasks: function(name, data){
