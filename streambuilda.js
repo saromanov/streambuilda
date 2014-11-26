@@ -169,8 +169,17 @@ var BuilderAsync = function(params){
 			taskNames[tasktitle] = data
 		},
 
-		tasks: function(name, data){
-
+		//Run tasks with TaskSystem;
+		tasks: function(name, data, connect){
+			var tsystem = TaskSystem;
+			var store = {'name':name, 'func': data};
+			if(connect != undefined){
+				if(typeof connect == 'string')
+					store['connect'] = [connect];
+				else
+					store['connect'] = connect;
+			}
+			tsystem.task(store);
 		},
 
 		watch: function(path){

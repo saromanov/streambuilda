@@ -327,5 +327,7 @@ var showTaskMapSecond = function(graph){
 		graph.get(complex[i]).nodes.forEach(function(x){
 				result[complex[i]].push(x);
 		})
-	}
+	};
+
+	console.log("TASKS: ", result);
 }
