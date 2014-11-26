@@ -269,8 +269,63 @@ var TaskSystem = (function(){
 				 })
 			})
 		}
+	},
+
+	/*Show how to looks task system
+	  I.E. show connections between tasks
+	*/
+	showTaskMap: function(view){
+		var graph = gr;
+		var complex = graph.getComplexNodes();
+		if(complex.length == 0){
+			var single = graph.getSingleNodes();
+			console.log("SINGLE NODES: ", single);
+			return;
+		}
+
+		if(view == undefined || view == 1){
+			showTaskMapOne(graph);
+		}
+		else if(view == 2){
+			showTaskMapSecond(graph);
+		}
 	}
+
 }
 })();
 
+//First Type of view
+var showTaskMapOne = function(graph){
+	var rootTasks = {};
+	var childTasks = {};
+	var complex = graph.getComplexNodes();
+	console.log("ROOT NODES: ", complex.map(function(title, i){
+		rootTasks[title] = i;
+		return title + "(" + i + ")";
+	}));
 
+	for(var i in complex){
+		graph.get(complex[i]).nodes.forEach(function(x){
+			if(x in childTasks)
+				childTasks[x].push(rootTasks[complex[i]]);
+			else
+				childTasks[x] = [rootTasks[complex[i]]]
+		})
+	}
+
+	console.log("OTHER NODES: ", childTasks);
+}
+
+var showTaskMapSecond = function(graph){
+	var complex = graph.getComplexNodes();
+	var result = {};
+	complex.forEach(function(x){
+		result[x] = [];
+	});
+
+	for(var i in complex){
+		graph.get(complex[i]).nodes.forEach(function(x){
+				result[complex[i]].push(x);
+		})
+	}
+}
