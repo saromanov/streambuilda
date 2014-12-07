@@ -141,7 +141,7 @@ var BuilderAsync = function(params){
 	var serializeFuncs = readSerializeFuncs("./funcs/");
 	var tasks = []
 	var taskNames = {}
-	var task = TaskSystem;
+	var task_sys = TaskSystem;
 	return {
 		log: function(message){
 			//Basic log message
@@ -165,8 +165,18 @@ var BuilderAsync = function(params){
 
 		//By default is async task
 		task: function(tasktitle, data){
-			tasks.push(data)
-			taskNames[tasktitle] = data
+			if(tasktitle != undefined){
+				tasks.push(data);
+				taskNames[tasktitle] = data;
+				task_sys.task({name: tasktitle, func:data.run});
+			}
+		},
+
+		//Append argument for the task;
+		args: function(tasktitle, arg){
+			if(tasktitle != undefined){
+
+			}
 		},
 
 		//Run tasks with TaskSystem;
@@ -220,6 +230,11 @@ var BuilderAsync = function(params){
 					}
 				})
 			}
+		},
+
+		//Experimental run from inner tasks
+		runExpr: function(){
+			task_sys.run();
 		},
 
 		//run data as sequence(every args from last event to next)

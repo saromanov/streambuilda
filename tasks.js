@@ -34,8 +34,11 @@ var TaskGraph = function(){
 	return {
 		set: function(data){
 			if(data.name != undefined){
+				var argum = data.args;
+				if(typeof argum != 'object')
+					argum = [argum];
 				var append = {name: data.name, func: data.func, result:undefined, type:'single', 
-								args: undefined, async:data.async};
+								args: argum, async:data.async};
 				graph[data.name] = append;
 			}
 		},
@@ -117,14 +120,14 @@ var TaskSystem = (function(){
 								'func': args.func, constraints:args.constraints});
 			}
 			else{
-				var data = {name: args.name, async:args.async};
+				var data = {name: args.name, async:args.async, 'args':args.args};
 				var commidx = commands.indexOf(args.func);
 				if(commidx != -1){
 					data = _.extend(data, {func: comm[commands[commidx]]})
 				}
 				else
 					data = _.extend(data, {func: args.func});
-				if(data['func'] == undefined){
+				if(data.func == undefined){
 					message = "Something Went Wrong and function in task '" + data.name + "' is undefined"
 					throw new SomethingException(message);
 				}

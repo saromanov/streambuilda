@@ -9,6 +9,8 @@ var fs = require('fs')
 	//https://github.com/jshint/fixmyjs
 	fixmyjs = require('fixmyjs')
 	gm = require('gm').subClass({imageMagick:true})
+	require('util'),
+    spawn = require('child_process').spawn,
 
 
 define(function(req){
@@ -27,15 +29,6 @@ var Commands = (function(){
 		   });
 		},
 
-		opendir: function(dirname){
-
-		},
-
-		/*readfile: function(path){
-			q.fcall(fs.readFile, path, 'utf-8').then(function(result){
-				console.log(result);
-			}).done()
-		},*/
 		/*
 		  input: list of paths
 		  Return files, which exist
@@ -141,11 +134,14 @@ var Commands = (function(){
 			}
 		},
 
+		//Run jshint in async
 		jshint: function(paths){
 			return {
 				run: function(){
 					if(typeof paths == 'string'){
 						fs.readFile(paths, 'utf-8', function(err, data){
+							if(data == undefined)
+								return false;
 							if(jshint(data.toString())){
 								console.log("File " + paths + " not contain errors")
 								return true;
@@ -193,6 +189,13 @@ var Commands = (function(){
 						})
 				}
 			}
+		},
+		livescript: function(paths){
+			return {
+				run: function(){
+					RunShScript('lsc', ['-c', paths]);
+				}
+			}
 		}
 
 	}
@@ -205,5 +208,13 @@ var FixMyJSLoader = function(paths){
 		jshint(src)
 		var stringFixedCode = fixmyjs(jshint.data(), src).run();
 		console.log("Code on path: " + paths)
+	})
+}
+
+var RunShScript = function(command, params){
+	//cmd = spawn('ls', ['-lh', '/usr']);
+	cmd = spawn(command, params);
+	cmd.stdout.on('data', function(data){
+
 	})
 }
