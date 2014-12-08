@@ -190,6 +190,8 @@ var Commands = (function(){
 				}
 			}
 		},
+
+		//Compile livescript to js
 		livescript: function(paths){
 			return {
 				run: function(){
@@ -216,5 +218,9 @@ var RunShScript = function(command, params){
 	cmd = spawn(command, params);
 	cmd.stdout.on('data', function(data){
 
-	})
+	});
+
+	cmd.stderr.on('data', function(data){
+		console.log("ERROR: ", data.toString())
+	});
 }

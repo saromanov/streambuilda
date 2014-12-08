@@ -108,6 +108,7 @@ var TaskSystem = (function(){
 		func - current function for task
 		commands from reserved list
 		argsfrom - results from past tasks
+		connect - connect with other tasks
 		*/
 
 		//TODO: Append inner tasks
@@ -140,12 +141,12 @@ var TaskSystem = (function(){
 			task.args(taskname, arguments)
 			arguments in list
 			option param
+			argumets in the list format
 		*/
 		args: function(name){
-			var arg = Array.prototype.slice.call(arguments, 1)[0];
-			if(arg != undefined)
-				gr.update(name, 'args', arg);
-			var argsfrom = arg['argsfrom'];
+			if(name != undefined)
+				gr.update(name.name, 'args', name.args);
+			var argsfrom = name.argsfrom;
 			if(argsfrom != undefined)
 				gr.update(name, 'argsfrom', argsfrom)
 		},
@@ -216,8 +217,12 @@ var TaskSystem = (function(){
 				//Merge arguments from argsfrom and args
 				var nodes = graph.get(x)['argsfrom'];
 				if(nodes != undefined){
-					var listofresults = nodes.map(function(v){ return graph.get(v).result});
-					var result = graph.get(x)['func'].apply(this, listofresults);
+					var listofresults = nodes.map(function(v){
+						if(v != undefined) 
+							return graph.get(v).result
+					});
+					console.log("MY RESULTS: ", graph.get(x).func);
+					var result = graph.get(x).func.apply(this, listofresults);
 					graph.update(x, 'result', result);
 				}	
 			});
@@ -322,15 +327,27 @@ var showTaskMapOne = function(graph){
 var showTaskMapSecond = function(graph){
 	var complex = graph.getComplexNodes();
 	var result = {};
+	var singleTasks = [];
+	var used = [];
 	complex.forEach(function(x){
 		result[x] = [];
+		used.push(x);
 	});
 
 	for(var i in complex){
 		graph.get(complex[i]).nodes.forEach(function(x){
 				result[complex[i]].push(x);
+				used.push(x);
 		})
 	};
 
+	var single= graph.getSingleNodes();
+	single.forEach(function(x){
+		if(used.indexOf(x) == -1){
+			singleTasks.push(x);
+		}
+	})
+
 	console.log("TASKS: ", result);
+	console.log("SINGLE TASKS: ", singleTasks);
 }
