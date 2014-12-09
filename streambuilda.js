@@ -1,5 +1,8 @@
 
 
+//http://jj09.net/gulp-tutorial/
+//http://help.nitrous.io/setting-up-gulp-with-livereload-and-sass/
+
 files = require('fs');
 http = require('http');
 //https://www.npmjs.org/package/fast-list
@@ -164,11 +167,23 @@ var BuilderAsync = function(params){
 		},
 
 		//By default is async task
+		//Data can be on single task or in list
 		task: function(tasktitle, data){
 			if(tasktitle != undefined){
-				tasks.push(data);
+				if(Array.isArray(data)){
+					data.forEach(function(task){
+
+					});
+				}
+				else{
+					//Single task
+					tasks.push(data);
+					taskNames[tasktitle] = data;
+					task_sys.task({name: tasktitle, func:data.run});
+				}
+				/*tasks.push(data);
 				taskNames[tasktitle] = data;
-				task_sys.task({name: tasktitle, func:data.run});
+				task_sys.task({name: tasktitle, func:data.run});*/
 			}
 		},
 

@@ -198,6 +198,15 @@ var Commands = (function(){
 					RunShScript('lsc', ['-c', paths]);
 				}
 			}
+		},
+
+		//Output log message
+		log: function(message){
+			return {
+				run: function(){
+
+				}
+			}
 		}
 
 	}

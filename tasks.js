@@ -2,6 +2,7 @@ var async = require('async')
 	fs = require('fs')
 	comm = require('commands')
 	Q = require('q')
+	uuid = require('node-uuid');
 	
 
 //http://underscorejs.ru/
@@ -32,6 +33,8 @@ function SomethingException(message){
 var TaskGraph = function(){
 	var graph = {};
 	return {
+
+		//Set single tasks
 		set: function(data){
 			if(data.name != undefined){
 				var argum = data.args;
@@ -42,6 +45,14 @@ var TaskGraph = function(){
 				graph[data.name] = append;
 			}
 		},
+		//Append listf of tasks
+		setList: function(data){
+			graph[data.name] = []
+			_.each(data, function(x){
+				var append = {'subtask': uuid.v4(), func:x};
+				graph[data.name].push(append);
+			});
+		}
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
@@ -135,6 +146,13 @@ var TaskSystem = (function(){
 				gr.set(data);
 			}
 		},
+
+		tasks: function(params){
+			if(params == undefined)
+				console.error("Task function not contain information about tasks");
+
+		},
+
 
 		//Append arguments
 		/*
