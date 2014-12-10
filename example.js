@@ -24,3 +24,11 @@ function livescript_example(){
 	build.task('ls', Commands.livescript('./fun5.ls'));
 	build.run();
 }
+
+function example_list_of_tasks(){
+	var build = new BuilderAsync();
+	build.task('name1', [Commands.jshint('./streambuilda.js'),
+						 	  Commands.log('Streams was prepared'),
+						 	  Commands.livescript('./fun5.ls')]);
+	build.runExpr();
+}

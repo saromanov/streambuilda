@@ -38,7 +38,7 @@ var TaskGraph = function(){
 		set: function(data){
 			if(data.name != undefined){
 				var argum = data.args;
-				if(typeof argum != 'object')
+				if(!Array.isArray(argum))
 					argum = [argum];
 				var append = {name: data.name, func: data.func, result:undefined, type:'single', 
 								args: argum, async:data.async};
@@ -47,12 +47,13 @@ var TaskGraph = function(){
 		},
 		//Append listf of tasks
 		setList: function(data){
-			graph[data.name] = []
-			_.each(data, function(x){
-				var append = {'subtask': uuid.v4(), func:x};
-				graph[data.name].push(append);
+			var subtasks = [];
+			_.each(data.tasks, function(x){
+				var append = {'subtask': uuid.v4(), func:x, 'type': 'single'};
+				subtasks.push(append);
 			});
-		}
+			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name};
+		},
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
@@ -84,6 +85,10 @@ var TaskGraph = function(){
 
 		getSingleNodes: function(){
 			return filter1(graph, 'type', 'single');
+		},
+
+		getTasksWithSubTasks: function(){
+			return filter1(graph, 'type', 'subtasks');
 		},
 
 		//Update node. For Ex: Set in result value (but not for async)
@@ -148,9 +153,11 @@ var TaskSystem = (function(){
 		},
 
 		tasks: function(params){
-			if(params == undefined)
+			if(params == undefined){
 				console.error("Task function not contain information about tasks");
-
+				return;
+			}
+			gr.setList(params);
 		},
 
 
@@ -175,10 +182,11 @@ var TaskSystem = (function(){
 			var graph = gr;
 			var startnode = arguments[0];
 			var complexNodes = graph.getComplexNodes();
+			var singleNodes = graph.getSingleNodes();
+			var subTasksNodes = graph.getTasksWithSubTasks();
 			//Get "simple nodes" without parents
-			if(_.isEmpty(complexNodes)){
+			if(!_.isEmpty(singleNodes)){
 				//Case without a complex nodes
-				singleNodes = graph.getSingleNodes();
 				_.each(singleNodes, function(x){
 					sgraph = graph.get(x);
 					if(sgraph.async){
@@ -195,7 +203,9 @@ var TaskSystem = (function(){
 					}
 				});
 				//throw new EmptyTaskException('This node has no tasks');
-			}else {
+			}
+
+			if(!_.isEmpty(complexNodes)){
 			//lookup nodes with childrens
 			complexNodes.forEach(function(x){
 				var nodes = graph.get(x)['nodes'];
@@ -242,9 +252,25 @@ var TaskSystem = (function(){
 					console.log("MY RESULTS: ", graph.get(x).func);
 					var result = graph.get(x).func.apply(this, listofresults);
 					graph.update(x, 'result', result);
-				}	
-			});
-		}
+					}	
+				});
+			}
+			if(!_.isEmpty(subTasksNodes)){
+				subTasksNodes.forEach(function(task){
+					var current_task = graph.get(task);
+					_.each(current_task.tasks, function(subtask){
+						if(task.async == true){
+							Q.fcall(subtask.func.run).then(function(x){
+							});
+						}
+						else{
+							subtask.func.run();
+						}
+					});
+				});
+			}
+
+
 	},
 
 	//Only for "sync tasks"

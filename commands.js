@@ -148,9 +148,10 @@ var Commands = (function(){
 							}
 
 							jshint.data().errors.forEach(function(errordata){
-								if(errordata != null)
+								if(errordata != null){
 									console.log("FILE: " + paths)
 									console.log(errordata.line + " " + errordata.raw);
+								}
 							})
 						})
 					}
@@ -204,7 +205,7 @@ var Commands = (function(){
 		log: function(message){
 			return {
 				run: function(){
-
+					console.log("LOG MESSAGE: ", message);
 				}
 			}
 		}
