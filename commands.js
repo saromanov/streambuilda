@@ -12,6 +12,9 @@ var fs = require('fs')
 	require('util'),
     spawn = require('child_process').spawn,
 
+    //https://www.npmjs.com/package/clean-css
+    CleanCSS = require('clean-css');
+
 
 define(function(req){
 	return Commands
@@ -40,21 +43,25 @@ var Commands = (function(){
 		},
 
 		compress: function(data){
-			var getfilename = function(item){
-				if(typeof item == 'string')
-					return item;
-				else if(typeof item == 'object' && item.length > 0)
-					return item[0];
+			return {
+				run: function(){
+					var getfilename = function(item){
+					if(typeof item == 'string')
+						return item;
+					else if(typeof item == 'object' && item.length > 0)
+						return item[0];
 
+					}
+				new compressor.minify({
+    				type: 'gcc',
+    				fileIn: data,
+    				fileOut: getfilename(data) + 'min-gcc.js',
+    				callback: function(err, min){
+        		 	//console.log(err);
+    				}
+				});
+				}
 			}
-			new compressor.minify({
-    			type: 'gcc',
-    			fileIn: data,
-    			fileOut: getfilename(data) + 'min-gcc.js',
-    			callback: function(err, min){
-        		 //console.log(err);
-    			}
-			});
 		},
 
 		readfile: function(path){
@@ -206,6 +213,29 @@ var Commands = (function(){
 			return {
 				run: function(){
 					console.log("LOG MESSAGE: ", message);
+				}
+			}
+		},
+
+		cleancss: function(path, outpath){
+			return{
+				run: function(){
+					fs.readFile(path, 'utf-8', function(err, data){
+						var minimized = new CleanCSS().minify(data);
+						if(outpath == undefined){
+							outpath = path.split('.')[0] + '_min.css';
+						}
+						fs.writeFile(outpath, minimized);
+					})
+				}
+			}
+		},
+
+		//user-defined function
+		func: function(datafunc){
+			return{
+				run: function(){
+					datafunc();
 				}
 			}
 		}

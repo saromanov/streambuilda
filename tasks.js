@@ -187,7 +187,9 @@ var TaskSystem = (function(){
 			//Get "simple nodes" without parents
 			if(!_.isEmpty(singleNodes)){
 				//Case without a complex nodes
+
 				_.each(singleNodes, function(x){
+					console.log("Start task: " + x);
 					sgraph = graph.get(x);
 					if(sgraph.async){
 						Q.fcall(sgraph.func, sgraph.args).then(function(result){
@@ -257,6 +259,7 @@ var TaskSystem = (function(){
 			}
 			if(!_.isEmpty(subTasksNodes)){
 				subTasksNodes.forEach(function(task){
+					console.log("Start task: " + task)
 					var current_task = graph.get(task);
 					_.each(current_task.tasks, function(subtask){
 						if(task.async == true){

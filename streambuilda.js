@@ -1,8 +1,5 @@
 
 
-//http://jj09.net/gulp-tutorial/
-//http://help.nitrous.io/setting-up-gulp-with-livereload-and-sass/
-
 files = require('fs');
 http = require('http');
 //https://www.npmjs.org/package/fast-list
@@ -171,9 +168,7 @@ var BuilderAsync = function(params){
 		task: function(tasktitle, data){
 			if(tasktitle != undefined){
 				if(Array.isArray(data)){
-					data.forEach(function(task){
-
-					});
+					task_sys.tasks({name: tasktitle, tasks: data});
 				}
 				else{
 					//Single task
@@ -277,4 +272,16 @@ function createFile(path){
 	return function(){
 
 	};
+}
+
+
+function test1(){
+	var build = new BuilderAsync();
+	build.task('name1', [Commands.jshint('./streambuilda.js')]);
+	build.run();
+
+}
+
+function test2(){
+	var build = new BuilderAsync();
 }
