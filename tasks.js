@@ -2,7 +2,7 @@ var async = require('async')
 	fs = require('fs')
 	comm = require('commands')
 	Q = require('q')
-	uuid = require('node-uuid');
+	uuid = require('node-uuid')
 	
 
 //http://underscorejs.ru/

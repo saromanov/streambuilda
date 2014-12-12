@@ -1,5 +1,4 @@
 
-
 files = require('fs');
 http = require('http');
 //https://www.npmjs.org/package/fast-list
@@ -16,7 +15,7 @@ var fastjs = require('fast.js');
 			require('supererror')
 			Q = require('q')
 			//https://www.npmjs.org/package/node-serialize
-			serialize = require('node-serialize');
+			serialize = require('node-serialize')
 
 
 
@@ -165,27 +164,21 @@ var BuilderAsync = function(params){
 
 		//By default is async task
 		//Data can be on single task or in list
-		task: function(tasktitle, data){
+		//connected - for connected tasks
+		task: function(tasktitle, data, connected){
 			if(tasktitle != undefined){
 				if(Array.isArray(data)){
-					task_sys.tasks({name: tasktitle, tasks: data});
+					task_sys.tasks({name: tasktitle, tasks: data, connect:connected});
 				}
-				else{
-					//Single task
-					tasks.push(data);
-					taskNames[tasktitle] = data;
-					task_sys.task({name: tasktitle, func:data.run});
-				}
-				/*tasks.push(data);
-				taskNames[tasktitle] = data;
-				task_sys.task({name: tasktitle, func:data.run});*/
+				else
+					task_sys.task({name: tasktitle, func:data.run, connect:connected});
 			}
 		},
 
 		//Append argument for the task;
 		args: function(tasktitle, arg){
 			if(tasktitle != undefined){
-
+				task_sys.args({name:tasktitle, args:arg})
 			}
 		},
 
@@ -226,7 +219,9 @@ var BuilderAsync = function(params){
 		},
 
 		run: function(data){
-			if(tasks.length > 0){
+			//Remove this part and set all implementation to TaskSystem func.
+
+			/*if(tasks.length > 0){
 				tasks.forEach(function(task){
 					if(task.length == undefined)
 						q.fcall(task.run).then(function(res){
@@ -239,14 +234,10 @@ var BuilderAsync = function(params){
 						})
 					}
 				})
-			}
-		},
+			}*/
 
-		//Experimental run from inner tasks
-		runExpr: function(startnode){
-			task_sys.run(startnode);
+			task_sys.run(data);
 		},
-
 		//run data as sequence(every args from last event to next)
 		seq: function(data, initval){
 			var result = Q(initval)
