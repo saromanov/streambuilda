@@ -243,8 +243,8 @@ var BuilderAsync = function(params){
 		},
 
 		//Experimental run from inner tasks
-		runExpr: function(){
-			task_sys.run();
+		runExpr: function(startnode){
+			task_sys.run(startnode);
 		},
 
 		//run data as sequence(every args from last event to next)
@@ -272,16 +272,4 @@ function createFile(path){
 	return function(){
 
 	};
-}
-
-
-function test1(){
-	var build = new BuilderAsync();
-	build.task('name1', [Commands.jshint('./streambuilda.js')]);
-	build.run();
-
-}
-
-function test2(){
-	var build = new BuilderAsync();
 }

@@ -54,6 +54,13 @@ var TaskGraph = function(){
 			});
 			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name};
 		},
+
+		//Remove node from graph
+		remove: function(taskname){
+			if(taskname in graph){
+				delete graph[taskname];
+			}
+		},
 		//Also, with arguments with tasks
 		//name is parent
 		setParents: function(array){
@@ -176,11 +183,10 @@ var TaskSystem = (function(){
 				gr.update(name, 'argsfrom', argsfrom)
 		},
 
-		run: function(){
+		run: function(startnode){
 
 			//Not for async events
 			var graph = gr;
-			var startnode = arguments[0];
 			var complexNodes = graph.getComplexNodes();
 			var singleNodes = graph.getSingleNodes();
 			var subTasksNodes = graph.getTasksWithSubTasks();
@@ -258,18 +264,16 @@ var TaskSystem = (function(){
 				});
 			}
 			if(!_.isEmpty(subTasksNodes)){
+				//Run in the case with subtasks
+				if(startnode != undefined){
+					//var start_task = graph.get(startnode);
+					runTask(graph, startnode);
+					graph.remove(startnode);
+					subTasksNodes = graph.getTasksWithSubTasks();
+				}
 				subTasksNodes.forEach(function(task){
 					console.log("Start task: " + task)
-					var current_task = graph.get(task);
-					_.each(current_task.tasks, function(subtask){
-						if(task.async == true){
-							Q.fcall(subtask.func.run).then(function(x){
-							});
-						}
-						else{
-							subtask.func.run();
-						}
-					});
+					runTask(graph, task);
 				});
 			}
 
@@ -397,4 +401,19 @@ var showTaskMapSecond = function(graph){
 
 	console.log("TASKS: ", result);
 	console.log("SINGLE TASKS: ", singleTasks);
+}
+
+
+//Run for 3-case of run in task method
+var runTask = function(graph, task){
+	var current_task = graph.get(task);
+	_.each(current_task.tasks, function(subtask){
+		if(task.async == true){
+			Q.fcall(subtask.func.run).then(function(x){
+			});
+		}
+		else{
+			subtask.func.run();
+		}
+	});
 }
