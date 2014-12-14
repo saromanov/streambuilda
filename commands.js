@@ -13,7 +13,8 @@ var fs = require('fs')
     spawn = require('child_process').spawn,
 
     //https://www.npmjs.com/package/clean-css
-    CleanCSS = require('clean-css');
+    CleanCSS = require('clean-css')
+    colors = require('colors')
 
 
 define(function(req){
@@ -203,7 +204,9 @@ var Commands = (function(){
 		livescript: function(paths){
 			return {
 				run: function(){
+					console.log("Start task livescript".red)
 					RunShScript('lsc', ['-c', paths]);
+					FinishedMessage('Finished task livescript')
 				}
 			}
 		},
@@ -212,7 +215,7 @@ var Commands = (function(){
 		log: function(message){
 			return {
 				run: function(){
-					console.log("LOG MESSAGE: ", message);
+					console.log("LOG MESSAGE: ".green, message);
 				}
 			}
 		},
@@ -226,6 +229,7 @@ var Commands = (function(){
 							outpath = path.split('.')[0] + '_min.css';
 						}
 						fs.writeFile(outpath, minimized);
+						FinishedMessage("Finished task cleancss")
 					})
 				}
 			}
@@ -236,6 +240,17 @@ var Commands = (function(){
 			return{
 				run: function(){
 					datafunc();
+				}
+			}
+		},
+
+		//Livereload with module https://github.com/napcs/node-livereload
+		livereload: function(path){
+			return{
+				run: function(){
+					livereload = require('livereload');
+					server = livereload.createServer();
+					server.watch(path);
 				}
 			}
 		}
@@ -263,4 +278,8 @@ var RunShScript = function(command, params){
 	cmd.stderr.on('data', function(data){
 		console.log("ERROR: ", data.toString())
 	});
+}
+
+var FinishedMessage = function(message){
+	console.log(message.yellow);
 }

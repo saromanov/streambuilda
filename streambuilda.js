@@ -166,12 +166,19 @@ var BuilderAsync = function(params){
 		//Data can be on single task or in list
 		//connected - for connected tasks
 		task: function(tasktitle, data, connected){
+			console.log("MY CONNECTED".red, connected);
 			if(tasktitle != undefined){
+				var task_append = {name: tasktitle, connect: connected}
 				if(Array.isArray(data)){
+					task_append.tasks = data
 					task_sys.tasks({name: tasktitle, tasks: data, connect:connected});
 				}
-				else
+				else if('run' in data){
 					task_sys.task({name: tasktitle, func:data.run, connect:connected});
+				}
+				else{
+					task_sys.task({name: tasktitle, func: Commands.func(data).run})
+				}
 			}
 		},
 
