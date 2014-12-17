@@ -20,12 +20,12 @@ var filter1 = function(data, key, value){
 		return data[x][key] == value});
 }
 
-function EmptyTaskException(message) {
+var EmptyTaskException = function(message) {
    this.message = message;
    this.name = "EmptyListException";
 }
 
-function SomethingException(message){
+var SomethingException = function(message){
 	this.message = message
 	this.name = "SomethingWentWrongException";
 }
@@ -45,7 +45,7 @@ var TaskGraph = function(){
 				graph[data.name] = append;
 			}
 		},
-		//Append listf of tasks
+		//Append list of tasks
 		setList: function(data){
 			var subtasks = [];
 			_.each(data.tasks, function(x){
@@ -55,7 +55,7 @@ var TaskGraph = function(){
 			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name};
 		},
 
-		//Remove node from graph
+		//Remove node from graph(if graph exist)
 		remove: function(taskname){
 			if(taskname in graph){
 				delete graph[taskname];
@@ -305,7 +305,6 @@ var TaskSystem = (function(){
 		if(!_.isEmpty(complex)){
 			_.each(complex, function(x){
 				var tasks = graph.get(x).nodes;
-				console.log("THIS IS TASKS: ", tasks)
 			})
 		}
 	},

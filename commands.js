@@ -73,6 +73,14 @@ var Commands = (function(){
 			}
 		},
 
+		readfileA: function(path){
+			return run: function(){
+				fs.readFile(path, 'utf-8', function(data){
+					console.log(data);
+				})
+			}
+		}
+
 		writefile: function(path, data){
 			fs.writeFileSync(path, data, 'utf-8')
 		},
