@@ -52,7 +52,7 @@ var TaskGraph = function(){
 				var append = {'subtask': uuid.v4(), func:x, 'type': 'single'};
 				subtasks.push(append);
 			});
-			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name};
+			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name, connect: data.connect};
 		},
 
 		//Remove node from graph(if graph exist)
@@ -271,9 +271,14 @@ var TaskSystem = (function(){
 					graph.remove(startnode);
 					subTasksNodes = graph.getTasksWithSubTasks();
 				}
+				//Запускать асинхронные события, когда есть подзадачи
+				var complex = subTasksNodes.filter(function(task){
+					return graph.get(task).connect != undefined;
+				})
+				
 				subTasksNodes.forEach(function(task){
-					console.log("Start task: " + task)
-					runTask(graph, task);
+					console.log("Start task: " + graph.get(task).connect)
+					/*console.log("RESULT: ", runTask(graph, task));*/
 				});
 			}
 
