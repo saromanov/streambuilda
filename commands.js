@@ -15,6 +15,7 @@ var fs = require('fs')
     //https://www.npmjs.com/package/clean-css
     CleanCSS = require('clean-css')
     colors = require('colors')
+    myth = require('myth')
 
 
 define(function(req){
@@ -74,12 +75,15 @@ var Commands = (function(){
 		},
 
 		readfileA: function(path){
-			return run: function(){
-				fs.readFile(path, 'utf-8', function(data){
+			return {
+
+				run:function(){
+					fs.readFile(path, 'utf-8', function(data){
 					console.log(data);
-				})
+					})
+				}
 			}
-		}
+		},
 
 		writefile: function(path, data){
 			fs.writeFileSync(path, data, 'utf-8')
@@ -259,6 +263,17 @@ var Commands = (function(){
 					livereload = require('livereload');
 					server = livereload.createServer();
 					server.watch(path);
+				}
+			}
+		},
+
+		myth: function(path, outpath){
+			return {
+				run: function(){
+					//Check exist
+					var css = fs.readFileSync(path, 'utf-8');
+					var converted = myth(css);
+					fs.writeFileSync(outpath, converted);
 				}
 			}
 		}
