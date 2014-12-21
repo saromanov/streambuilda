@@ -291,9 +291,10 @@ var TaskSystem = (function(){
 	},
 
 	//All tasks run async. Not pay attention to async flag
+	//Some commands already run as async
 	runAsync: function(){
-		var graph = gr
-		var args = Array.prototype.slice.call(arguments)
+		var graph = gr;
+		var args = Array.prototype.slice.call(arguments);
 		var simple = graph.getSingleNodes();
 		if(!_.isEmpty(simple)){
 			_.each(simple, function(x){
@@ -310,22 +311,20 @@ var TaskSystem = (function(){
 		if(!_.isEmpty(complex)){
 			_.each(complex, function(x){
 				var tasks = graph.get(x).nodes;
+				_.each(tasks, function(subtask){
+					q.fcall(node.func, 4).then(function(y){})
+				})
 			})
 		}
 	},
 
+	//Only with complex task case and as sequence
 	runAsync2: function(){
 		var graph = gr
 		var complex = graph.getComplexNodes()
 		if(!_.isEmpty(complex)){
 			_.each(complex, function(parnode){
 				var tasks = graph.get(parnode).nodes
-				/*_.each(tasks, function(x){ 
-					q.fcall(graph.get(x).func).then(function(res){
-						console.log("THIS IS RES: ", res)
-					})
-				})*/
-
 				q.allSettled(tasks.map(function(task){ return graph.get(task).func()}))
 				 .then(function(res){
 				 	//run parent task
