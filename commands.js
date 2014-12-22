@@ -16,6 +16,7 @@ var fs = require('fs')
     CleanCSS = require('clean-css')
     colors = require('colors')
     myth = require('myth')
+    _ = require('underscore')
 
 
 define(function(req){
@@ -26,14 +27,6 @@ define(function(req){
 var Commands = (function(){
 
 	return {
-		createdir: function(dirname){
-			mkdirp(dirname, function(e){
-			if(e){
-				throw "Error in create folder"
-			}
-		   });
-		},
-
 		/*
 		  input: list of paths
 		  Return files, which exist
@@ -107,18 +100,24 @@ var Commands = (function(){
 			folders("B", ["C","D"])
 		*/
 		folders: function(folder, subfolders){
-			createdir(folder);
-			subfolders.forEach(function(name){
-				createdir(folder + "/" + name);
-			});
+			return {
+				run: function(){
+					createDir(folder);
+					if(subfolders != undefined)
+						subfolders.forEach(function(name){
+							createdir(folder + "/" + name);
+						});
+				}
+			}
 		},
 
-		createdir: function(dirname){
-			mkdirp(dirname, function(e){
-			if(e){
-				throw "Error in create folder"
+		//Copy target files
+		move: function(path, newpath){
+			return {
+				run: function(){
+					fs.rename(path, newpath);
+				}
 			}
-			});
 		},
 
 		//Test data
@@ -159,21 +158,12 @@ var Commands = (function(){
 			return {
 				run: function(){
 					if(typeof paths == 'string'){
-						fs.readFile(paths, 'utf-8', function(err, data){
-							if(data == undefined)
-								return false;
-							if(jshint(data.toString())){
-								console.log("File " + paths + " not contain errors")
-								return true;
-							}
-
-							jshint.data().errors.forEach(function(errordata){
-								if(errordata != null){
-									console.log("FILE: " + paths)
-									console.log(errordata.line + " " + errordata.raw);
-								}
-							})
-						})
+						JSHint(paths);
+					}
+					else if(Array.isArray(paths)){
+						//Set several paths for jshint
+						if(paths.length > 0)
+							_.each(paths, function(path){JSHint(path);});
 					}
 					return false;
 				}
@@ -289,7 +279,7 @@ var FixMyJSLoader = function(paths){
 		var stringFixedCode = fixmyjs(jshint.data(), src).run();
 		console.log("Code on path: " + paths)
 	})
-}
+};
 
 var RunShScript = function(command, params){
 	//cmd = spawn('ls', ['-lh', '/usr']);
@@ -301,8 +291,34 @@ var RunShScript = function(command, params){
 	cmd.stderr.on('data', function(data){
 		console.log("ERROR: ", data.toString())
 	});
-}
+};
 
 var FinishedMessage = function(message){
 	console.log(message.yellow);
-}
+};
+
+var JSHint = function(path){
+	fs.readFile(path, 'utf-8', function(err, data){
+		if(data == undefined)
+			return false;
+		if(jshint(data.toString())){
+			console.log("File " + path + " not contain errors")
+			return true;
+		}
+
+		jshint.data().errors.forEach(function(errordata){
+			if(errordata != null){
+				console.log("FILE: " + path)
+				console.log(errordata.line + " " + errordata.raw);
+			}
+		})
+	})
+};
+
+var createDir = function(dirname){
+	mkdirp(dirname, function(e){
+		if(e){
+			throw "Error in create folder"
+		}
+	});
+};
