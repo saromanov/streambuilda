@@ -17,6 +17,7 @@ var fs = require('fs')
     colors = require('colors')
     myth = require('myth')
     _ = require('underscore')
+    pathutils = require('path')
 
 
 define(function(req){
@@ -115,7 +116,10 @@ var Commands = (function(){
 		move: function(path, newpath){
 			return {
 				run: function(){
-					fs.rename(path, newpath);
+					fs.exists(path, function(response){
+						if(response)
+							MoveFile(path, newpath);
+					})
 				}
 			}
 		},
@@ -188,13 +192,17 @@ var Commands = (function(){
 		},
 
 		//Manipulating with images(resize)
+		//paths is dict
 		img: function(paths){
 			return{
 				run: function(){
-					gm(paths)
-						.resize(25,25)
+					var path = paths.path
+					var x = paths.resize[0];
+					var y = paths.resize[1];
+					gm(path)
+						.resize(x,y)
 						.autoOrient()
-						.write(paths, function(err, out, stderr){
+						.write(paths.outpath, function(err, out, stderr){
 							if (err != undefined)
 								console.log("Found error in write image", err);
 						})
@@ -322,3 +330,17 @@ var createDir = function(dirname){
 		}
 	});
 };
+
+//Move file from one path to another
+var MoveFile = function(path, newpath){
+	if(newpath[newpath.length-1] != '/')
+		newpath = newpath + '/';
+	fs.rename(path, newpath + pathutils.basename(path), function(x){
+		if(x != null){
+			console.log("Path not found. The new path will be created");
+			createDir(newpath);
+			//fs.closeSync(fs.openSync(newpath, 'w'));
+			MoveFile(path, newpath);					
+		}
+	});
+}
