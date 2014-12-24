@@ -141,7 +141,10 @@ var BuilderAsync = function(params){
 	var tasks = []
 	var taskNames = {}
 	var task_sys = TaskSystem;
+	var sys = HeartOfSB('./streambildas');
 	return {
+		variable: [],
+		sysdir: './streambilda',
 		log: function(message){
 			//Basic log message
 			console.log(message)
@@ -166,7 +169,6 @@ var BuilderAsync = function(params){
 		//Data can be on single task or in list
 		//connected - for connected tasks
 		task: function(tasktitle, data, connected){
-			console.log("MY CONNECTED".red, connected);
 			if(tasktitle != undefined){
 				var task_append = {name: tasktitle, connect: connected}
 				if(Array.isArray(data)){
@@ -177,7 +179,7 @@ var BuilderAsync = function(params){
 					task_sys.task({name: tasktitle, func:data.run, connect:connected});
 				}
 				else{
-					task_sys.task({name: tasktitle, func: Commands.func(data).run})
+					task_sys.task({name: tasktitle, func: Commands.func(data).run, connect: connected})
 				}
 			}
 		},
@@ -188,6 +190,7 @@ var BuilderAsync = function(params){
 				task_sys.args({name:tasktitle, args:arg})
 			}
 		},
+
 
 		//Run tasks with TaskSystem;
 		tasks: function(name, data, connect){
@@ -242,7 +245,7 @@ var BuilderAsync = function(params){
 					}
 				})
 			}*/
-
+			console.log(this.variable);
 			task_sys.run(data);
 		},
 		//run data as sequence(every args from last event to next)
@@ -256,18 +259,38 @@ var BuilderAsync = function(params){
 			})
 		}
 	}
+};
+
+//Core of each task for each session
+//Heart Of StreamBilda
+var HeartOfSB = function(path){
+	//No need some complex solution, just get from random
+	var id = Math.round(Math.random() * 10000000);
+	//Create system dir(for this module)
+	//console.log(files.lstatSync(path).isDirectory());
+	if(!files.existsSync(path))
+		createDir(path);
+	if(files.lstatSync(path).isDirectory()){
+		files.openSync(path + "/" + id.toString(), 'w');
+	}
+	else{
+
+	}
+
+	return {
+		//Append information about tasks
+		append: function(data){
+
+		}
+	}
 }
 
+var createDir = function(dirname){
+	mkdirp(dirname, function(e){
+		if(e){
+			throw "Error in create folder"
+		}
+	});
+};
 
-//Load something from internet
-//http://nodejs.org/api/http.html
-function loadFromNet(path){
 
-}
-
-//Создание файла
-function createFile(path){
-	return function(){
-
-	};
-}
