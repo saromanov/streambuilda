@@ -191,21 +191,45 @@ var Commands = (function(){
 			}
 		},
 
-		//Manipulating with images(resize)
+		//Image resize
 		//paths is dict
-		img: function(paths){
+		imgresize: function(paths){
 			return{
 				run: function(){
-					var path = paths.path
 					var x = paths.resize[0];
 					var y = paths.resize[1];
-					gm(path)
-						.resize(x,y)
-						.autoOrient()
+					var gmobject = gm(paths.path)
+						.resize(x,y);
+						/*.autoOrient()
 						.write(paths.outpath, function(err, out, stderr){
 							if (err != undefined)
 								console.log("Found error in write image", err);
-						})
+						})*/
+					imgGM(paths, gmobject);
+				}
+			}
+		},
+
+		imgrotate: function(paths){
+			return{
+				run: function(){
+					if(paths != undefined){
+						var gmobject = gm(paths.path)
+							.rotate(paths.color, paths.degree);
+						imgGM(paths, gmobject);
+					}
+				}
+			}
+		},
+
+		imgcolor: function(paths){
+			return{
+				run: function(){
+					if(paths != undefined){
+						var gmobject = gm(paths.path)
+										.colorize(paths.r,paths.g,paths.b)
+						imgGM(paths, gmobject);
+					}
 				}
 			}
 		},
@@ -233,6 +257,7 @@ var Commands = (function(){
 		cleancss: function(path, outpath){
 			return{
 				run: function(){
+					console.log("Start task cleancss".red);
 					fs.readFile(path, 'utf-8', function(err, data){
 						var minimized = new CleanCSS().minify(data);
 						if(outpath == undefined){
@@ -343,4 +368,16 @@ var MoveFile = function(path, newpath){
 			MoveFile(path, newpath);					
 		}
 	});
-}
+};
+
+//Manipulating with images with gm module
+var imgGM = function(data, gmobject){
+	var outpath= data.outpath;
+	console.log(outpath);
+	gmobject
+	.autoOrient()
+	.write(outpath, function(err, out, stderr){
+		if (err != undefined)
+				console.log("Found error in write image", err);
+	});
+};
