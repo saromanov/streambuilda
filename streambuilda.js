@@ -95,30 +95,6 @@ function Store(){
 }
 
 
-var Builder2 = function(){
-	return {
-		log: function(message, func){
-			console.log(message);
-			if(func != undefined){
-				console.log("YES");
-			}
-		},
-
-		read: function(item){
-
-		},
-
-		run: function(){
-			console.log(fast.pop())
-		},
-
-		task: function(item){
-
-		}
-	}
-
-}
-
 var readSerializeFuncs = function(dirname){
 	var serializeFuncs = {}
 	try {
@@ -138,7 +114,6 @@ var readSerializeFuncs = function(dirname){
 //All events waitings for start
 var BuilderAsync = function(params){
 	var serializeFuncs = readSerializeFuncs("./funcs/");
-	var tasks = []
 	var taskNames = {}
 	var task_sys = TaskSystem;
 	var sys = HeartOfSB('./streambildas');
@@ -173,13 +148,19 @@ var BuilderAsync = function(params){
 				var task_append = {name: tasktitle, connect: connected}
 				if(Array.isArray(data)){
 					task_append.tasks = data
-					task_sys.tasks({name: tasktitle, tasks: data, connect:connected});
+					var prepare = {name: tasktitle, tasks: data, connect:connected};
+					task_sys.tasks(prepare);
+					taskNames[tasktitle] = prepare;
 				}
 				else if('run' in data){
-					task_sys.task({name: tasktitle, func:data.run, connect:connected});
+					var prepare = {name: tasktitle, func:data.run, connect:connected}
+					task_sys.task(prepare);
+					taskNames[tasktitle] = prepare;
 				}
 				else{
-					task_sys.task({name: tasktitle, func: Commands.func(data).run, connect: connected})
+					var prepare = {name: tasktitle, func: Commands.func(data).run, connect: connected};
+					task_sys.task(prepare);
+					taskNames[tasktitle] = prepare;
 				}
 			}
 		},
@@ -215,17 +196,9 @@ var BuilderAsync = function(params){
 				name: title,
 				say: func
 			}
-			var dirname = './funcs/'
+			var dirname = './funcs/';
 			if(process.platform == 'win')
-				dirname = ".\\funcs"
-			var result = serialize.serialize(obj);
-			fs.exists(dirname, function(ex){
-				if(!ex)
-					mkdirp(dirname, function(a){})
-				console.log("Serialize new function to: ", dirname + title + ".json")
-				fs.writeFile(dirname + title + ".json", result, 
-					function(res){});
-			});
+				dirname = ".\\funcs";
 		},
 
 		run: function(data){
@@ -245,7 +218,7 @@ var BuilderAsync = function(params){
 					}
 				})
 			}*/
-			console.log(this.variable);
+			sys.append(taskNames);
 			task_sys.run(data);
 		},
 		//run data as sequence(every args from last event to next)
@@ -257,9 +230,30 @@ var BuilderAsync = function(params){
 			    else
 					result = result.then(comm[f]);
 			})
+		},
+
+		//Store current session
+		saveSession: function(name){
+
 		}
 	}
 };
+
+//Serialize user and system data
+//Need append hash
+var SerializeData = function(dirname, obj, isjson){
+	var result = serialize.serialize(obj);
+	fs.exists(dirname, function(ex){
+		if(!ex)
+			mkdirp(dirname, function(a){});
+		var path = dirname + ".json";
+		if(isjson == undefined)
+			path = dirname;
+		//console.log("Serialize new function to: ", dirname + title + ".json")
+		fs.writeFile(path, result, 
+			function(res){});
+	});
+}
 
 //Core of each task for each session
 //Heart Of StreamBilda
@@ -268,10 +262,11 @@ var HeartOfSB = function(path){
 	var id = Math.round(Math.random() * 10000000);
 	//Create system dir(for this module)
 	//console.log(files.lstatSync(path).isDirectory());
+	var fullpath = path + "/" + id.toString();
 	if(!files.existsSync(path))
 		createDir(path);
 	if(files.lstatSync(path).isDirectory()){
-		files.openSync(path + "/" + id.toString(), 'w');
+		files.openSync(fullpath, 'w');
 	}
 	else{
 
@@ -280,7 +275,7 @@ var HeartOfSB = function(path){
 	return {
 		//Append information about tasks
 		append: function(data){
-
+			SerializeData(fullpath, data);
 		}
 	}
 }
@@ -292,5 +287,3 @@ var createDir = function(dirname){
 		}
 	});
 };
-
-
