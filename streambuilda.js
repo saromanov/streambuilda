@@ -99,11 +99,15 @@ var readSerializeFuncs = function(dirname){
 	var serializeFuncs = {}
 	try {
 			fs.readdirSync(dirname).map(function(path){
-			var result = JSON.parse(fs.readFileSync(dirname + path, 'utf-8'));
-			serializeFuncs[result.name] = serialize.unserialize(result).say
-		});
+				var loadeddata = fs.readFileSync(dirname + "/" + path, 'utf-8');
+				if(loadeddata.length > 0){
+					var result = JSON.parse(loadeddata);
+					serializeFuncs[result.name] = serialize.unserialize(result);
+				}
+			});
 
 	}catch(ex){
+		console.log(ex);
 		return {}
 	}
 	return serializeFuncs;
@@ -113,7 +117,8 @@ var readSerializeFuncs = function(dirname){
 //All tasks run as async
 //All events waitings for start
 var BuilderAsync = function(params){
-	var serializeFuncs = readSerializeFuncs("./funcs/");
+	//var serializeFuncs = readSerializeFuncs("./funcs/");
+	readSerializeFuncs('./streambildas')
 	var taskNames = {}
 	var task_sys = TaskSystem;
 	var sys = HeartOfSB('./streambildas');
@@ -218,7 +223,7 @@ var BuilderAsync = function(params){
 					}
 				})
 			}*/
-			sys.append(taskNames);
+			//sys.append(taskNames);
 			task_sys.run(data);
 		},
 		//run data as sequence(every args from last event to next)
@@ -278,6 +283,11 @@ var HeartOfSB = function(path){
 			SerializeData(fullpath, data);
 		}
 	}
+};
+
+//Deserizalize objects
+var LoadStoredObjects = function(path){
+	readSerializeFuncs(path);
 }
 
 var createDir = function(dirname){
@@ -287,3 +297,4 @@ var createDir = function(dirname){
 		}
 	});
 };
+
