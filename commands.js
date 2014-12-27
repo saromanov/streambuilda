@@ -33,9 +33,19 @@ var Commands = (function(){
 		  Return files, which exist
 		*/ 
 		checkPathsExist: function(paths){
-			return paths.filter(function(x){
-				return fs.exists.Sync(x);
-			})
+			return {
+				run: function(){
+					if(!Array.isArray(paths))
+						paths = [paths];
+					var result = paths.filter(function(x){
+						return fs.existsSync(x);
+					});
+					if(result == [])
+						return false;
+					else
+						return true;
+				}
+			}
 		},
 
 		compress: function(data){
@@ -229,6 +239,7 @@ var Commands = (function(){
 						var gmobject = gm(paths.path)
 										.colorize(paths.r,paths.g,paths.b)
 						imgGM(paths, gmobject);
+						return true;
 					}
 				}
 			}
@@ -240,7 +251,8 @@ var Commands = (function(){
 				run: function(){
 					console.log("Start task livescript".red)
 					RunShScript('lsc', ['-c', paths]);
-					FinishedMessage('Finished task livescript')
+					FinishedMessage('Finished task livescript');
+					return true;
 				}
 			}
 		},

@@ -15,7 +15,8 @@ var fastjs = require('fast.js');
 			require('supererror')
 			Q = require('q')
 			//https://www.npmjs.org/package/node-serialize
-			serialize = require('node-serialize')
+			//serialize = require('node-serialize')
+			serialize = require('funcster')
 
 
 
@@ -98,11 +99,14 @@ function Store(){
 var readSerializeFuncs = function(dirname){
 	var serializeFuncs = {}
 	try {
+		 if(fs.existsSync(dirname))
 			fs.readdirSync(dirname).map(function(path){
+				var fullpath = dirname + "/" + path;
 				var loadeddata = fs.readFileSync(dirname + "/" + path, 'utf-8');
 				if(loadeddata.length > 0){
 					var result = JSON.parse(loadeddata);
 					serializeFuncs[result.name] = serialize.unserialize(result);
+					console.log(serialize.unserialize(result).img.func())
 				}
 			});
 
@@ -117,8 +121,8 @@ var readSerializeFuncs = function(dirname){
 //All tasks run as async
 //All events waitings for start
 var BuilderAsync = function(params){
-	//var serializeFuncs = readSerializeFuncs("./funcs/");
-	readSerializeFuncs('./streambildas')
+	//ar serializeFuncs = readSerializeFuncs("./funcs/");
+	//readSerializeFuncs('./streambildas')
 	var taskNames = {}
 	var task_sys = TaskSystem;
 	var sys = HeartOfSB('./streambildas');
@@ -129,17 +133,6 @@ var BuilderAsync = function(params){
 			//Basic log message
 			console.log(message)
 		},
-		read: function(data){
-			comm[data.name] = Commands['checkPathsExist'];
-		},
-
-		exisis: function(data){
-			comm[data.name] = data.action;
-		},
-
-		compress: function(data){
-			comm[data.name] = Commands['compress']
-		}, 
 		//user event
 		event: function(data){
 
@@ -168,6 +161,10 @@ var BuilderAsync = function(params){
 					taskNames[tasktitle] = prepare;
 				}
 			}
+		},
+
+		taskIfElse: function(taskif, taskelse){
+			task_sys.taskIfElse(taskif, taskelse);
 		},
 
 		//Append argument for the task;
@@ -207,22 +204,6 @@ var BuilderAsync = function(params){
 		},
 
 		run: function(data){
-			//Remove this part and set all implementation to TaskSystem func.
-
-			/*if(tasks.length > 0){
-				tasks.forEach(function(task){
-					if(task.length == undefined)
-						q.fcall(task.run).then(function(res){
-						}).done()
-					else{
-						task.forEach(function(innertask){
-							q.fcall(innertask.run).then(function(res){
-
-							}).done()
-						})
-					}
-				})
-			}*/
 			//sys.append(taskNames);
 			task_sys.run(data);
 		},
@@ -258,29 +239,38 @@ var SerializeData = function(dirname, obj, isjson){
 		fs.writeFile(path, result, 
 			function(res){});
 	});
-}
+};
+
+var SerializeSystemData = function(path, obj){
+	var result = serialize.deepSerialize(HeartOfSB);
+	var out = serialize.deepDeserialize(result);
+	fs.exists(path, function(ex){
+		fs.writeFile(path, result, function(res){});
+	});
+};
 
 //Core of each task for each session
 //Heart Of StreamBilda
 var HeartOfSB = function(path){
+	var fs = require('fs');
 	//No need some complex solution, just get from random
 	var id = Math.round(Math.random() * 10000000);
 	//Create system dir(for this module)
 	//console.log(files.lstatSync(path).isDirectory());
 	var fullpath = path + "/" + id.toString();
-	if(!files.existsSync(path))
+	if(!fs.existsSync(path))
 		createDir(path);
-	if(files.lstatSync(path).isDirectory()){
+	/*if(files.lstatSync(path).isDirectory()){
 		files.openSync(fullpath, 'w');
-	}
+	}*/
 	else{
-
+		console.log("THIS IS TRUE");
 	}
 
 	return {
 		//Append information about tasks
 		append: function(data){
-			SerializeData(fullpath, data);
+			SerializeSystemData(fullpath, data);
 		}
 	}
 };
@@ -291,10 +281,5 @@ var LoadStoredObjects = function(path){
 }
 
 var createDir = function(dirname){
-	mkdirp(dirname, function(e){
-		if(e){
-			throw "Error in create folder"
-		}
-	});
+	fs.mkdirSync(dirname);
 };
-

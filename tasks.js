@@ -159,6 +159,14 @@ var TaskSystem = (function(){
 			}
 		},
 
+		taskIfElse: function(taskif, taskelse){
+			Q.fcall(taskif.run).then(function(result){
+				console.log(result);
+				if(result != true)
+					taskelse.run();
+			});
+		},
+
 		tasks: function(params){
 			if(params == undefined){
 				console.error("Task function not contain information about tasks");
@@ -182,8 +190,8 @@ var TaskSystem = (function(){
 			if(argsfrom != undefined)
 				gr.update(name, 'argsfrom', argsfrom)
 		},
-
-		run: function(startnode){
+		
+		run: function(startnode, globalvariables){
 
 			//Not for async events
 			var graph = gr;
@@ -195,9 +203,9 @@ var TaskSystem = (function(){
 				//Case without a complex nodes
 
 				_.each(singleNodes, function(x){
-					console.log("Start task: " + x);
 					sgraph = graph.get(x);
 					if(sgraph.async){
+						console.log("THIS IS")
 						Q.fcall(sgraph.func, sgraph.args).then(function(result){
 							graph.update(x, 'result', result);
 						}).done();
@@ -277,8 +285,8 @@ var TaskSystem = (function(){
 				})
 				
 				subTasksNodes.forEach(function(task){
-					console.log("Start task: " + graph.get(task).connect)
-					/*console.log("RESULT: ", runTask(graph, task));*/
+					//console.log("Start task: " + graph.get(task).connect)
+					console.log("RESULT: ", runTask(graph, task));
 				});
 			}
 
