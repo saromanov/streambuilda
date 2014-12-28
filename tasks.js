@@ -161,7 +161,6 @@ var TaskSystem = (function(){
 
 		taskIfElse: function(taskif, taskelse){
 			Q.fcall(taskif.run).then(function(result){
-				console.log(result);
 				if(result != true)
 					taskelse.run();
 			});

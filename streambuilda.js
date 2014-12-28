@@ -17,6 +17,8 @@ var fastjs = require('fast.js');
 			//https://www.npmjs.org/package/node-serialize
 			//serialize = require('node-serialize')
 			serialize = require('funcster')
+			//https://www.npmjs.com/package/protobuf
+			Schema= require('protobuf').Schema
 
 
 
@@ -123,7 +125,9 @@ var readSerializeFuncs = function(dirname){
 var BuilderAsync = function(params){
 	//ar serializeFuncs = readSerializeFuncs("./funcs/");
 	//readSerializeFuncs('./streambildas')
-	var taskNames = {}
+	var taskNames = {};
+	//If-Else tasks
+	var IfElse = [];
 	var task_sys = TaskSystem;
 	var sys = HeartOfSB('./streambildas');
 	return {
@@ -133,9 +137,32 @@ var BuilderAsync = function(params){
 			//Basic log message
 			console.log(message)
 		},
-		//user event
-		event: function(data){
 
+		//Load protobuf configuration file
+		configure: function(path){
+			var ob = { num: 42 };
+			var schema = new Schema(fs.readFileSync(path));
+			var buffer = schema['config.Configuration'];
+			console.log(buffer.parse(buffer.serialize({})))
+		},
+
+		//Load configure from JSON file
+		configureJSON: function(jsonpath){
+			if(fs.existsSync(jsonpath)){
+				var result = JSON.parse(fs.readFileSync(jsonpath));
+				var keys = Object.keys(result);
+				var build = new BuilderAsync();
+				if(keys.length != 0){
+					keys.forEach(function(taskname){
+						var commands = Object.keys(result[taskname]);
+						commands.forEach(function(command){
+							if(command in Commands)
+								build.task(command, Commands[command](result[taskname][command]))
+						})
+					})
+				}
+				build.run();
+			}
 		},
 
 		//By default is async task
@@ -164,7 +191,7 @@ var BuilderAsync = function(params){
 		},
 
 		taskIfElse: function(taskif, taskelse){
-			task_sys.taskIfElse(taskif, taskelse);
+			IfElse.push([taskif, taskelse]);
 		},
 
 		//Append argument for the task;
@@ -205,6 +232,13 @@ var BuilderAsync = function(params){
 
 		run: function(data){
 			//sys.append(taskNames);
+			console.log("Start running tasks: ", new Date());
+			if(IfElse.length > 0){
+				IfElse.forEach(function(x){
+					if(x.length == 2)
+						task_sys.taskIfElse(x[0], x[1]);
+				})
+			}
 			task_sys.run(data);
 		},
 		//run data as sequence(every args from last event to next)
