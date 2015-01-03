@@ -1,4 +1,5 @@
 
+
 files = require('fs');
 http = require('http');
 //https://www.npmjs.org/package/fast-list
@@ -143,11 +144,14 @@ var BuilderAsync = function(params){
 			var ob = { num: 42 };
 			var schema = new Schema(fs.readFileSync(path));
 			var buffer = schema['config.Configuration'];
-			console.log(buffer.parse(buffer.serialize({})))
+			console.log(buffer.parse(new Buffer(4)))
+			/*console.log(buffer)
+			var rec_data = {title:0}
+			console.log(buffer.parse(buffer.serialize(rec_data)))*/
 		},
 
 		//Load configure from JSON file
-		configureJSON: function(jsonpath){
+		configureRun: function(jsonpath){
 			if(fs.existsSync(jsonpath)){
 				var result = JSON.parse(fs.readFileSync(jsonpath));
 				var keys = Object.keys(result);
@@ -157,7 +161,7 @@ var BuilderAsync = function(params){
 						var commands = Object.keys(result[taskname]);
 						commands.forEach(function(command){
 							if(command in Commands)
-								build.task(command, Commands[command](result[taskname][command]))
+								build.task(taskname, Commands[command](result[taskname][command]))
 						})
 					})
 				}
@@ -196,7 +200,7 @@ var BuilderAsync = function(params){
 
 		//Append argument for the task;
 		args: function(tasktitle, arg){
-			if(tasktitle != undefined){
+			if(tasktitle != undefined && arg != undefined){
 				task_sys.args({name:tasktitle, args:arg})
 			}
 		},
@@ -298,7 +302,7 @@ var HeartOfSB = function(path){
 		files.openSync(fullpath, 'w');
 	}*/
 	else{
-		console.log("THIS IS TRUE");
+		
 	}
 
 	return {

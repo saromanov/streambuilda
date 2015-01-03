@@ -184,7 +184,7 @@ var TaskSystem = (function(){
 		*/
 		args: function(name){
 			if(name != undefined)
-				gr.update(name.name, 'args', name.args);
+				gr.update(name.name, 'args', [name.args]);
 			var argsfrom = name.argsfrom;
 			if(argsfrom != undefined)
 				gr.update(name, 'argsfrom', argsfrom)
@@ -203,8 +203,8 @@ var TaskSystem = (function(){
 
 				_.each(singleNodes, function(x){
 					sgraph = graph.get(x);
+					/*sgraph.func = sgraph.func().run*/
 					if(sgraph.async){
-						console.log("THIS IS")
 						Q.fcall(sgraph.func, sgraph.args).then(function(result){
 							graph.update(x, 'result', result);
 						}).done();
