@@ -84,6 +84,7 @@ var TaskGraph = function(){
 			if(_.has(graph,node))
 				return graph[node];
 		},
+
 		data: function(){ return graph;},
 
 		getComplexNodes: function(){
@@ -224,35 +225,16 @@ var TaskSystem = (function(){
 			//lookup nodes with childrens
 			complexNodes.forEach(function(x){
 				var nodes = graph.get(x)['nodes'];
-				//console.log(_.all(function(x){ return graphget(x).result != undefined;}, nodes))
 				nodes.forEach(function(y){
 					var singlenode = graph.get(y);
 					if(singlenode != undefined){
-						var result = singlenode.func.apply(this, singlenode.args);
+						//var result = singlenode.func.apply(this, singlenode.args);
+						singlenode.func();
 						//console.log(nodes)
 						//TODO: Weak place(Need async solution)
 
 						//Now constraints only for numbers
 						var constraints = graph.get(x).constraints;
-						if(_.isUndefined(constraints) == false){
-							var keys = Object.keys(constraints)
-							if(keys.indexOf(y) != -1){
-								if(_.isObject(constraints[y])){
-									var data = constraints[y];
-									if(result >= data.min && result <= data.max)
-										graph.update(y, 'result', result);
-								}
-								else{
-									if(result == constraints[y])
-										graph.update(y, 'result', result);
-								}
-							}
-							else
-								graph.update(y, 'result', result);
-						}
-						else{
-							graph.update(y, 'result', result);
-						}
 					}
 				});
 
@@ -264,7 +246,6 @@ var TaskSystem = (function(){
 						if(v != undefined) 
 							return graph.get(v).result
 					});
-					console.log("MY RESULTS: ", graph.get(x).func);
 					var result = graph.get(x).func.apply(this, listofresults);
 					graph.update(x, 'result', result);
 					}	
@@ -426,4 +407,27 @@ var runTask = function(graph, task){
 			subtask.func.run();
 		}
 	});
+}
+
+
+//TODO
+var Constraints = function(graph, result, y, constraints){
+	//Append constraints for tasks
+	if(_.isUndefined(constraints) == false){
+		var keys = Object.keys(constraints)
+		if(keys.indexOf(y) != -1){
+			if(_.isObject(constraints[y])){
+					var data = constraints[y];
+					if(result >= data.min && result <= data.max)
+						graph.update(y, 'result', result);
+						return;
+					}
+				else{
+					if(result == constraints[y])
+						graph.update(y, 'result', result);
+					return;
+					}
+		}
+	}
+	graph.update(y, 'result', result);
 }

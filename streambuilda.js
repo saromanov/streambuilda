@@ -144,7 +144,6 @@ var BuilderAsync = function(params){
 			var ob = { num: 42 };
 			var schema = new Schema(fs.readFileSync(path));
 			var buffer = schema['config.Configuration'];
-			console.log(buffer.parse(new Buffer(4)))
 			/*console.log(buffer)
 			var rec_data = {title:0}
 			console.log(buffer.parse(buffer.serialize(rec_data)))*/
@@ -205,6 +204,10 @@ var BuilderAsync = function(params){
 			}
 		},
 
+		taskAll: function(taslist){
+			//run if all tests is correct
+
+		},
 
 		//Run tasks with TaskSystem;
 		tasks: function(name, data, connect){
@@ -321,3 +324,4 @@ var LoadStoredObjects = function(path){
 var createDir = function(dirname){
 	fs.mkdirSync(dirname);
 };
+
