@@ -15,3 +15,11 @@ var TestComplexNodes = function(){
 	builder.task('name3', Commands.log("Checker"), ['name2'])
 	builder.run();
 }
+
+/*
+	Example with load configuration from json file
+*/
+var LoadFromConfigure = function(){
+	var builder = new BuilderAsync();
+	builder.configureRun('taskdata.json');
+}

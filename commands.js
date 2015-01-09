@@ -18,6 +18,8 @@ var fs = require('fs')
     myth = require('myth')
     _ = require('underscore')
     pathutils = require('path')
+    proto = require('protobuf')
+    csv = require('csv')
 
 
 define(function(req){
@@ -40,7 +42,7 @@ var Commands = (function(){
 					var result = paths.filter(function(x){
 						return fs.existsSync(x);
 					});
-					if(result == [])
+					if(result.length == 0)
 						return false;
 					else
 						return true;
@@ -309,6 +311,20 @@ var Commands = (function(){
 					var css = fs.readFileSync(path, 'utf-8');
 					var converted = myth(css);
 					fs.writeFileSync(outpath, converted);
+				}
+			}
+		},
+
+		csvload: function(path, conf){
+			return {
+				run: function(){
+					var generator = csv.generate(conf);
+					var parser = csv.parse();
+					var transformer = csv.transform(function(data){
+  							return data.map(function(value){return value.toUpperCase()});
+					});
+					//var stringifier = csv.stringify();
+
 				}
 			}
 		}

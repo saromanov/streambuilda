@@ -20,6 +20,7 @@ var fastjs = require('fast.js');
 			serialize = require('funcster')
 			//https://www.npmjs.com/package/protobuf
 			Schema= require('protobuf').Schema
+			validator = require('validator');
 
 
 
@@ -139,7 +140,7 @@ var BuilderAsync = function(params){
 			console.log(message)
 		},
 
-		//Load protobuf configuration file
+		//Load protobuf configuration file (in development)
 		configure: function(path){
 			var ob = { num: 42 };
 			var schema = new Schema(fs.readFileSync(path));
@@ -152,7 +153,14 @@ var BuilderAsync = function(params){
 		//Load configure from JSON file
 		configureRun: function(jsonpath){
 			if(fs.existsSync(jsonpath)){
-				var result = JSON.parse(fs.readFileSync(jsonpath));
+				var readJSONLike = fs.readFileSync(jsonpath);
+				//Check if readed readJSONLike is valid json
+				if(!validator.isJSON(readJSONLike))
+				{
+					console.error("This file not contain valid json information");
+					return;
+				}
+				var result = JSON.parse(readJSONLike);
 				var keys = Object.keys(result);
 				var build = new BuilderAsync();
 				if(keys.length != 0){
@@ -324,4 +332,3 @@ var LoadStoredObjects = function(path){
 var createDir = function(dirname){
 	fs.mkdirSync(dirname);
 };
-
