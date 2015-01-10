@@ -195,16 +195,18 @@ var TaskSystem = (function(){
 
 			//Not for async events
 			var graph = gr;
+			if(graph == undefined)
+				throw ("THis graph object is undefined")
 			var complexNodes = graph.getComplexNodes();
 			var singleNodes = graph.getSingleNodes();
 			var subTasksNodes = graph.getTasksWithSubTasks();
+			runSingleTasks(graph, singleNodes);
 			//Get "simple nodes" without parents
-			if(!_.isEmpty(singleNodes)){
+			/*if(!_.isEmpty(singleNodes)){
 				//Case without a complex nodes
 
 				_.each(singleNodes, function(x){
 					sgraph = graph.get(x);
-					/*sgraph.func = sgraph.func().run*/
 					if(sgraph.async){
 						Q.fcall(sgraph.func, sgraph.args).then(function(result){
 							graph.update(x, 'result', result);
@@ -219,7 +221,7 @@ var TaskSystem = (function(){
 					}
 				});
 				//throw new EmptyTaskException('This node has no tasks');
-			}
+			}*/
 
 			if(!_.isEmpty(complexNodes)){
 			//lookup nodes with childrens
@@ -430,4 +432,29 @@ var Constraints = function(graph, result, y, constraints){
 		}
 	}
 	graph.update(y, 'result', result);
+}
+
+
+//Parallel tasks without parents
+var runSingleTasks = function(graph, singleNodes){
+	if(!_.isEmpty(singleNodes)){
+		//Case without a complex nodes
+		_.each(singleNodes, function(x){
+			sgraph = graph.get(x);
+			/*sgraph.func = sgraph.func().run*/
+			if(sgraph.async){
+				Q.fcall(sgraph.func, sgraph.args).then(function(result){
+					graph.update(x, 'result', result);
+				}).done();
+			}
+			else{
+				if(sgraph.args == undefined){
+					message = "Something Went Wrong and arguments in task '" + sgraph.name + "' is undefined"
+					throw new SomethingException(message);
+				}
+				graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
+			}
+		});
+				//throw new EmptyTaskException('This node has no tasks');
+	}
 }
