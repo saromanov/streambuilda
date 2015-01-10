@@ -196,63 +196,16 @@ var TaskSystem = (function(){
 			//Not for async events
 			var graph = gr;
 			if(graph == undefined)
-				throw ("THis graph object is undefined")
+				throw ("This graph object is undefined")
 			var complexNodes = graph.getComplexNodes();
 			var singleNodes = graph.getSingleNodes();
 			var subTasksNodes = graph.getTasksWithSubTasks();
-			runSingleTasks(graph, singleNodes);
-			//Get "simple nodes" without parents
-			/*if(!_.isEmpty(singleNodes)){
-				//Case without a complex nodes
-
-				_.each(singleNodes, function(x){
-					sgraph = graph.get(x);
-					if(sgraph.async){
-						Q.fcall(sgraph.func, sgraph.args).then(function(result){
-							graph.update(x, 'result', result);
-						}).done();
-					}
-					else{
-						if(sgraph.args == undefined){
-							message = "Something Went Wrong and arguments in task '" + sgraph.name + "' is undefined"
-							throw new SomethingException(message);
-						}
-						graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
-					}
-				});
-				//throw new EmptyTaskException('This node has no tasks');
-			}*/
-
 			if(!_.isEmpty(complexNodes)){
-			//lookup nodes with childrens
-			complexNodes.forEach(function(x){
-				var nodes = graph.get(x)['nodes'];
-				nodes.forEach(function(y){
-					var singlenode = graph.get(y);
-					if(singlenode != undefined){
-						//var result = singlenode.func.apply(this, singlenode.args);
-						singlenode.func();
-						//console.log(nodes)
-						//TODO: Weak place(Need async solution)
-
-						//Now constraints only for numbers
-						var constraints = graph.get(x).constraints;
-					}
-				});
-
-				//Use result in list of nodes
-				//Merge arguments from argsfrom and args
-				var nodes = graph.get(x)['argsfrom'];
-				if(nodes != undefined){
-					var listofresults = nodes.map(function(v){
-						if(v != undefined) 
-							return graph.get(v).result
-					});
-					var result = graph.get(x).func.apply(this, listofresults);
-					graph.update(x, 'result', result);
-					}	
-				});
+				runComplexTasks(graph, complexNodes);
+				//runSingleTasks(graph, singleNodes);
 			}
+			if(!_.isEmpty(singleNodes))
+				runSingleTasks(graph, singleNodes);
 			if(!_.isEmpty(subTasksNodes)){
 				//Run in the case with subtasks
 				if(startnode != undefined){
@@ -457,4 +410,38 @@ var runSingleTasks = function(graph, singleNodes){
 		});
 				//throw new EmptyTaskException('This node has no tasks');
 	}
+	return graph;
+}
+
+
+var runComplexTasks = function(graph, complexNodes){
+	complexNodes.forEach(function(x){
+		var nodes = graph.get(x)['nodes'];
+		nodes.forEach(function(y){
+		//Get list of connected simple nodes
+		var singlenode = graph.get(y);
+		console.log("THIS IS SINGLE: ", singlenode)
+		if(singlenode != undefined){
+			//var result = singlenode.func.apply(this, singlenode.args);
+			singlenode.func();
+			//console.log(nodes)
+			//TODO: Weak place(Need async solution)
+
+			//Now constraints only for numbers
+			var constraints = graph.get(x).constraints;
+			}
+		});
+
+		//Use result in list of nodes
+		//Merge arguments from argsfrom and args
+		var nodes = graph.get(x)['argsfrom'];
+		if(nodes != undefined){
+			var listofresults = nodes.map(function(v){
+				if(v != undefined) 
+					return graph.get(v).result
+			});
+		var result = graph.get(x).func.apply(this, listofresults);
+		graph.update(x, 'result', result);
+					}	
+		});
 }
