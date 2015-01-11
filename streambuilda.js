@@ -166,10 +166,13 @@ var BuilderAsync = function(params){
 				if(keys.length != 0){
 					keys.forEach(function(taskname){
 						var commands = Object.keys(result[taskname]);
+						//Tasks will be in list type
+						var listoftasks = [];
 						commands.forEach(function(command){
 							if(command in Commands)
-								build.task(taskname, Commands[command](result[taskname][command]))
-						})
+								listoftasks.push(Commands[command](result[taskname][command]));
+						});
+						build.task(taskname, listoftasks)
 					})
 				}
 				build.run();
@@ -180,6 +183,15 @@ var BuilderAsync = function(params){
 		//Data can be on single task or in list
 		//connected - for connected tasks
 		task: function(tasktitle, data, connected){
+			//Check connected type
+			if(connected != undefined){
+				var checkconn = connected.filter(function(x){ return typeof x != 'string';});
+				if(checkconn.length > 0)
+				{
+					console.error("One of type from connecte type if not string. All tasks will be simple");
+					connected = undefined;
+				}
+			}
 			if(tasktitle != undefined){
 				var task_append = {name: tasktitle, connect: connected}
 				if(Array.isArray(data)){

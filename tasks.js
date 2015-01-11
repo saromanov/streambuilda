@@ -420,7 +420,6 @@ var runComplexTasks = function(graph, complexNodes){
 		nodes.forEach(function(y){
 		//Get list of connected simple nodes
 		var singlenode = graph.get(y);
-		console.log("THIS IS SINGLE: ", singlenode)
 		if(singlenode != undefined){
 			//var result = singlenode.func.apply(this, singlenode.args);
 			singlenode.func();
@@ -436,12 +435,8 @@ var runComplexTasks = function(graph, complexNodes){
 		//Merge arguments from argsfrom and args
 		var nodes = graph.get(x)['argsfrom'];
 		if(nodes != undefined){
-			var listofresults = nodes.map(function(v){
-				if(v != undefined) 
-					return graph.get(v).result
-			});
-		var result = graph.get(x).func.apply(this, listofresults);
-		graph.update(x, 'result', result);
-					}	
+			var result = graph.get(x).func()
+			graph.update(x, 'result', result);
+			}
 		});
 }
