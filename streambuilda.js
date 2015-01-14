@@ -87,17 +87,24 @@ function createData(data){
 	}
 }
 
-
-
-var TaskWait = function(task){
-
-}
-
-
-//Function for store data 
-function Store(){
-	var readStorage = '';
-}
+//Serialize user and system data
+//Need append hash
+var SerializeData = function(dirname, obj, isjson){
+	var result = serialize.deepSerialize(obj);
+	console.log(serialize.deepDeserialize(result, {
+		globals: {console: console, message:"A"}
+	}).tasks[0].run());
+	fs.exists(dirname, function(ex){
+		if(!ex)
+			mkdirp(dirname, function(a){});
+		var path = dirname + ".json";
+		if(isjson == undefined)
+			path = dirname;
+		//console.log("Serialize new function to: ", dirname + title + ".json")
+		fs.writeFile(path, result, 
+			function(res){});
+	});
+};
 
 
 var readSerializeFuncs = function(dirname){
@@ -110,7 +117,7 @@ var readSerializeFuncs = function(dirname){
 				if(loadeddata.length > 0){
 					var result = JSON.parse(loadeddata);
 					serializeFuncs[result.name] = serialize.unserialize(result);
-					console.log(serialize.unserialize(result).img.func())
+					//console.log(serializeFuncs[result.name])
 				}
 			});
 
@@ -257,6 +264,15 @@ var BuilderAsync = function(params){
 				dirname = ".\\funcs";
 		},
 
+		//Serialize task (This task may be use in future)
+		saveTask: function(taskname){
+			if(taskname in taskNames){
+				SerializeData(taskname, taskNames[taskname]);
+				var result = readSerializeFuncs(taskname);
+				console.log(result);
+			}
+		},
+
 		run: function(data){
 			//sys.append(taskNames);
 			console.log("Start running tasks: ", new Date());
@@ -286,21 +302,6 @@ var BuilderAsync = function(params){
 	}
 };
 
-//Serialize user and system data
-//Need append hash
-var SerializeData = function(dirname, obj, isjson){
-	var result = serialize.serialize(obj);
-	fs.exists(dirname, function(ex){
-		if(!ex)
-			mkdirp(dirname, function(a){});
-		var path = dirname + ".json";
-		if(isjson == undefined)
-			path = dirname;
-		//console.log("Serialize new function to: ", dirname + title + ".json")
-		fs.writeFile(path, result, 
-			function(res){});
-	});
-};
 
 var SerializeSystemData = function(path, obj){
 	var result = serialize.deepSerialize(HeartOfSB);
@@ -344,3 +345,4 @@ var LoadStoredObjects = function(path){
 var createDir = function(dirname){
 	fs.mkdirSync(dirname);
 };
+

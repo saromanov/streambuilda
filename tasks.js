@@ -202,11 +202,11 @@ var TaskSystem = (function(){
 			var subTasksNodes = graph.getTasksWithSubTasks();
 			if(!_.isEmpty(complexNodes)){
 				runComplexTasks(graph, complexNodes);
-				//runSingleTasks(graph, singleNodes);
 			}
 			if(!_.isEmpty(singleNodes))
 				runSingleTasks(graph, singleNodes);
 			if(!_.isEmpty(subTasksNodes)){
+				console.log("This is run");
 				//Run in the case with subtasks
 				if(startnode != undefined){
 					//var start_task = graph.get(startnode);
@@ -220,7 +220,6 @@ var TaskSystem = (function(){
 				})
 				
 				subTasksNodes.forEach(function(task){
-					//console.log("Start task: " + graph.get(task).connect)
 					console.log("RESULT: ", runTask(graph, task));
 				});
 			}
