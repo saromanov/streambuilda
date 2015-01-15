@@ -20,6 +20,8 @@ var fs = require('fs')
     pathutils = require('path')
     proto = require('protobuf')
     csv = require('csv')
+    //https://github.com/isaacs/node-glob
+    glob = require('glob')
 
 
 define(function(req){
@@ -174,12 +176,17 @@ var Commands = (function(){
 			return {
 				run: function(){
 					if(typeof paths == 'string'){
-						JSHint(paths);
+						_.each(glob.sync(paths), function(x){JSHint(x);});
 					}
 					else if(Array.isArray(paths)){
 						//Set several paths for jshint
-						if(paths.length > 0)
-							_.each(paths, function(path){JSHint(path);});
+						if(paths.length > 0){
+							_.each(paths, function(path){
+								_.each(glob.sync(path), function(cpath){
+									JSHint(cpath)
+								});
+							});
+						}
 					}
 					return false;
 				}
@@ -251,10 +258,22 @@ var Commands = (function(){
 		livescript: function(paths){
 			return {
 				run: function(){
-					console.log("Start task livescript".red)
-					RunShScript('lsc', ['-c', paths]);
+					targetpath = paths
+					/*if (typeof paths == 'string') {
+						console.log("Start task livescript".red)
+						RunShScript('lsc', ['-c', paths]);
+						FinishedMessage('Finished task livescript');
+						return true;
+					}*/
+
+					if(typeof paths != 'string' && Object.keys(paths).length > 0)
+						targetpath = paths.path
+					console.log("Start task livescript".red);
+					files = glob.sync(targetpath);
+					_.each(files, function(path){
+						RunShScript('lsc', ['-c', path]);
+					});
 					FinishedMessage('Finished task livescript');
-					return true;
 				}
 			}
 		},
