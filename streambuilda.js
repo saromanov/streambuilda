@@ -20,7 +20,8 @@ var fastjs = require('fast.js');
 			serialize = require('funcster')
 			//https://www.npmjs.com/package/protobuf
 			Schema= require('protobuf').Schema
-			validator = require('validator');
+			validator = require('validator')
+			glob = require('glob');
 
 
 
@@ -116,7 +117,7 @@ var readSerializeFuncs = function(dirname){
 				var loadeddata = fs.readFileSync(dirname + "/" + path, 'utf-8');
 				if(loadeddata.length > 0){
 					var result = JSON.parse(loadeddata);
-					serializeFuncs[result.name] = serialize.unserialize(result);
+					serializeFuncs[result.name] = serialize.deepDeserialize(result);
 					//console.log(serializeFuncs[result.name])
 				}
 			});
@@ -132,8 +133,7 @@ var readSerializeFuncs = function(dirname){
 //All tasks run as async
 //All events waitings for start
 var BuilderAsync = function(params){
-	//ar serializeFuncs = readSerializeFuncs("./funcs/");
-	//readSerializeFuncs('./streambildas')
+	var serializeFuncs = readSerializeFuncs("./funcs/");
 	var taskNames = {};
 	//If-Else tasks
 	var IfElse = [];
@@ -249,22 +249,23 @@ var BuilderAsync = function(params){
 			tsystem.task(store);
 		},
 
-		watch: function(path){
-			comm[data.name] = Commands['watch']
-		}, 
-
 		//Serialization user function to ./funcs
+		//Note: Serialization without global objects
 		registerFunction: function(title, func){
 			var obj = {
 				name: title,
-				say: func
+				func: func
 			}
 			var dirname = './funcs/';
 			if(process.platform == 'win')
 				dirname = ".\\funcs";
+			var result = serialize.deepSerialize(obj);
+			fs.writeFileSync(dirname + title, JSON.stringify(result));
+
 		},
 
 		//Serialize task (This task may be use in future)
+		//Experimental
 		saveTask: function(taskname){
 			if(taskname in taskNames){
 				SerializeData(taskname, taskNames[taskname]);
@@ -345,4 +346,3 @@ var LoadStoredObjects = function(path){
 var createDir = function(dirname){
 	fs.mkdirSync(dirname);
 };
-
