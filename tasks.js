@@ -206,7 +206,6 @@ var TaskSystem = (function(){
 			if(!_.isEmpty(singleNodes))
 				runSingleTasks(graph, singleNodes);
 			if(!_.isEmpty(subTasksNodes)){
-				console.log("This is run");
 				//Run in the case with subtasks
 				if(startnode != undefined){
 					//var start_task = graph.get(startnode);
@@ -218,9 +217,10 @@ var TaskSystem = (function(){
 				var complex = subTasksNodes.filter(function(task){
 					return graph.get(task).connect != undefined;
 				})
-				
+				var result = Q(complex);
+
 				subTasksNodes.forEach(function(task){
-					console.log("RESULT: ", runTask(graph, task));
+					result = result.then(runTask(graph, task));
 				});
 			}
 

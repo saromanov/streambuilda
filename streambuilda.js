@@ -201,6 +201,7 @@ var BuilderAsync = function(params){
 			}
 			if(tasktitle != undefined){
 				var task_append = {name: tasktitle, connect: connected}
+				//Run tasks as sequence
 				if(Array.isArray(data)){
 					task_append.tasks = data
 					var prepare = {name: tasktitle, tasks: data, connect:connected};
@@ -219,6 +220,14 @@ var BuilderAsync = function(params){
 				}
 			}
 		},
+
+
+		//Append task from loaded functions
+		usertask: function(title){
+			if(title in serializeFuncs){
+				task_sys.task({name:title, func: Commands.func(serializeFuncs[title].func).run})
+			}
+		}, 
 
 		taskIfElse: function(taskif, taskelse){
 			IfElse.push([taskif, taskelse]);

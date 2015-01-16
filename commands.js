@@ -278,6 +278,18 @@ var Commands = (function(){
 			}
 		},
 
+
+		shell: function(command, args){
+			//Run shell commands and scripts
+			//command - basic command
+			//args - this arguments
+			return {
+				run: function(){
+					RunShScript(command, args);
+				}
+			}
+		},
+
 		//Output log message
 		log: function(message){
 			return {
