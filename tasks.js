@@ -3,6 +3,7 @@ var async = require('async')
 	comm = require('commands')
 	Q = require('q')
 	uuid = require('node-uuid')
+	sleep = require('sleep')
 	
 
 //http://underscorejs.ru/
@@ -217,10 +218,11 @@ var TaskSystem = (function(){
 				var complex = subTasksNodes.filter(function(task){
 					return graph.get(task).connect != undefined;
 				})
-				var result = Q(complex);
+				//var result = Q(complex);
 
-				subTasksNodes.forEach(function(task){
-					result = result.then(runTask(graph, task));
+				_.each(subTasksNodes, function(task){
+					//result = result.then(runTask(graph, task));
+					runTask(graph, task);
 				});
 			}
 
@@ -352,14 +354,15 @@ var showTaskMapSecond = function(graph){
 //Run for 3-case of run in task method
 var runTask = function(graph, task){
 	var current_task = graph.get(task);
+	/* Run over all subtasks */
+	var result = Q(current_task.tasks);
 	_.each(current_task.tasks, function(subtask){
-		if(task.async == true){
-			Q.fcall(subtask.func.run).then(function(x){
-			});
-		}
+		if(task.async == true)
+			result = result.then(subtask.func.run);
 		else{
 			subtask.func.run();
 		}
+		sleep.sleep(1);
 	});
 }
 

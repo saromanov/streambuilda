@@ -285,7 +285,9 @@ var Commands = (function(){
 			//args - this arguments
 			return {
 				run: function(){
+					console.log("Start task shell".red);
 					RunShScript(command, args);
+					FinishedMessage('Finished task shell');
 				}
 			}
 		},
