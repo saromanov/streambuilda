@@ -23,3 +23,21 @@ var LoadFromConfigure = function(){
 	var builder = new BuilderAsync();
 	builder.configureRun('taskdata.json');
 }
+
+/*
+	Example for loading function from serialization data 
+*/
+var testRegisterFunction = function(){
+	var builder = new BuilderAsync();
+	builder.usertask('hello');
+	builder.run();
+}
+
+/* Example of sequential execution of tasks */
+
+var testSeq = function(){
+	var builder = new BuilderAsync();
+	builder.task('seq1', [Commands.livescript('test.ls'), 
+						Commands.shell('cp', ['test.js', 'test2.js'])])
+	builder.run();
+}

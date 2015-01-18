@@ -35,6 +35,7 @@ var Commands = (function(){
 		/*
 		  input: list of paths
 		  Return files, which exist
+		  Note: Need to remove
 		*/ 
 		checkPathsExist: function(paths){
 			return {
@@ -126,14 +127,12 @@ var Commands = (function(){
 			}
 		},
 
-		//Copy target files
+		//Move target data to another place
 		move: function(path, newpath){
 			return {
 				run: function(){
-					fs.exists(path, function(response){
-						if(response)
-							MoveFile(path, newpath);
-					})
+					if(fs.existsSync(path))
+						MoveFile2(path, newpath);
 				}
 			}
 		},
@@ -233,9 +232,11 @@ var Commands = (function(){
 			return{
 				run: function(){
 					if(paths != undefined){
+						console.log("Start task imgrotate".red);
 						var gmobject = gm(paths.path)
 							.rotate(paths.color, paths.degree);
 						imgGM(paths, gmobject);
+						FinishedMessage("Finished task imgrotate")
 					}
 				}
 			}
@@ -431,10 +432,22 @@ var MoveFile = function(path, newpath){
 	});
 };
 
+
+var MoveFile2 = function(path, newpath){
+	if(newpath ==undefined){
+		console.error("Path or newpath is undefined")
+		return;
+	}
+	fs.rename(path, newpath, function(x){
+
+	});
+}
+
 //Manipulating with images with gm module
 var imgGM = function(data, gmobject){
 	var outpath= data.outpath;
-	console.log(outpath);
+	if(outpath == undefined)
+		outpath = data.path
 	gmobject
 	.autoOrient()
 	.write(outpath, function(err, out, stderr){
