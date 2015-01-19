@@ -176,8 +176,13 @@ var BuilderAsync = function(params){
 						//Tasks will be in list type
 						var listoftasks = [];
 						commands.forEach(function(command){
-							if(command in Commands)
-								listoftasks.push(Commands[command](result[taskname][command]));
+							if(command in Commands){
+								args = result[taskname][command]
+								if(Array.isArray(args))
+									listoftasks.push(Commands[command].apply(this, args));
+								else
+									listoftasks.push(Commands[command](args));
+							}
 						});
 						build.task(taskname, listoftasks)
 					})

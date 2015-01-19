@@ -29,6 +29,16 @@ define(function(req){
 });
 
 
+/*
+	Basic body for commands is
+	function
+	{
+		return{
+			run()...
+		}
+	}
+*/
+
 var Commands = (function(){
 
 	return {
@@ -73,35 +83,6 @@ var Commands = (function(){
 				});
 				}
 			}
-		},
-
-		readfile: function(path){
-			return {
-				run: function(){
-					return fs.readFileSync(path, 'utf-8')
-				}
-			}
-		},
-
-		readfileA: function(path){
-			return {
-
-				run:function(){
-					fs.readFile(path, 'utf-8', function(data){
-					console.log(data);
-					})
-				}
-			}
-		},
-
-		writefile: function(path, data){
-			fs.writeFileSync(path, data, 'utf-8')
-		},
-
-		writefileA: function(path, data){
-			q.fcall(fs.writeFile, path, data, 'utf-8').then(function(responce){
-
-			}).done()
 		},
 		watchChanges: function(path, action){
 			var watcher = chokidar.watch('streambuilda.js', {persistent: true});
