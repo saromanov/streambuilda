@@ -207,6 +207,8 @@ var TaskSystem = (function(){
 			if(!_.isEmpty(singleNodes))
 				runSingleTasks(graph, singleNodes);
 			if(!_.isEmpty(subTasksNodes)){
+
+				//Run async tasks if exist
 				//Run in the case with subtasks
 				if(startnode != undefined){
 					//var start_task = graph.get(startnode);
@@ -219,7 +221,6 @@ var TaskSystem = (function(){
 					return graph.get(task).connect != undefined;
 				})
 				//var result = Q(complex);
-
 				_.each(subTasksNodes, function(task){
 					//result = result.then(runTask(graph, task));
 					runTask(graph, task);
@@ -357,8 +358,10 @@ var runTask = function(graph, task){
 	/* Run over all subtasks */
 	var result = Q(current_task.tasks);
 	_.each(current_task.tasks, function(subtask){
-		if(task.async == true)
+		console.log(current_task);
+		if(task.async == true){
 			result = result.then(subtask.func.run);
+		}
 		else{
 			subtask.func.run();
 		}
@@ -396,10 +399,12 @@ var runSingleTasks = function(graph, singleNodes){
 		//Case without a complex nodes
 		_.each(singleNodes, function(x){
 			sgraph = graph.get(x);
+			console.log("Start: ", x);
 			/*sgraph.func = sgraph.func().run*/
 			if(sgraph.async){
 				Q.fcall(sgraph.func, sgraph.args).then(function(result){
 					graph.update(x, 'result', result);
+					FinishedMessage('Finished task ' + x);
 				}).done();
 			}
 			else{
@@ -408,7 +413,9 @@ var runSingleTasks = function(graph, singleNodes){
 					throw new SomethingException(message);
 				}
 				graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
+				FinishedMessage('Finished task ' + x);
 			}
+			sleep.sleep(1);
 		});
 				//throw new EmptyTaskException('This node has no tasks');
 	}
@@ -442,3 +449,7 @@ var runComplexTasks = function(graph, complexNodes){
 			}
 		});
 }
+
+var FinishedMessage = function(message){
+	console.log(message.yellow);
+};

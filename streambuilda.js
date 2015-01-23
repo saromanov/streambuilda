@@ -152,9 +152,8 @@ var BuilderAsync = function(params){
 			var ob = { num: 42 };
 			var schema = new Schema(fs.readFileSync(path));
 			var buffer = schema['config.Configuration'];
-			/*console.log(buffer)
-			var rec_data = {title:0}
-			console.log(buffer.parse(buffer.serialize(rec_data)))*/
+			buffer.parse(fs.readFileSync('./buftest.proto'))
+			//console.log(buffer.parse(buffer.serialize(rec_data)))
 		},
 
 		//Load configure from JSON file
@@ -223,6 +222,13 @@ var BuilderAsync = function(params){
 					task_sys.task(prepare);
 					taskNames[tasktitle] = prepare;
 				}
+			}
+		},
+
+		taskAsync: function(tasktitle, data){
+			if(Array.isArray(data)){
+				var prepare = {name:tasktitle, tasks:data, async: true};
+				task_sys.tasks(prepare);
 			}
 		},
 
