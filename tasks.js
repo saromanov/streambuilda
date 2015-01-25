@@ -53,7 +53,7 @@ var TaskGraph = function(){
 				var append = {'subtask': uuid.v4(), func:x, 'type': 'single'};
 				subtasks.push(append);
 			});
-			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name, connect: data.connect};
+			graph[data.name] = {type: 'subtasks', tasks: subtasks, name:data.name, connect: data.connect, async:data.async};
 		},
 
 		//Remove node from graph(if graph exist)
@@ -219,10 +219,9 @@ var TaskSystem = (function(){
 				//Запускать асинхронные события, когда есть подзадачи
 				var complex = subTasksNodes.filter(function(task){
 					return graph.get(task).connect != undefined;
-				})
-				//var result = Q(complex);
+				});
+				//Q.all(_.each(subTasksNodes, function(x){ return graph.get(x);}));
 				_.each(subTasksNodes, function(task){
-					//result = result.then(runTask(graph, task));
 					runTask(graph, task);
 				});
 			}
@@ -296,6 +295,10 @@ var TaskSystem = (function(){
 		else if(view == 2){
 			showTaskMapSecond(graph);
 		}
+	},
+
+	info:function(){
+		return {complex: gr.getComplexNodes(), simple: gr.getSingleNodes(), subtasks: gr.getTasksWithSubTasks()}
 	}
 
 }
@@ -358,9 +361,9 @@ var runTask = function(graph, task){
 	/* Run over all subtasks */
 	var result = Q(current_task.tasks);
 	_.each(current_task.tasks, function(subtask){
-		console.log(current_task);
-		if(task.async == true){
-			result = result.then(subtask.func.run);
+		if(current_task.async == true){
+			Q.fcall(subtask.func.run);
+			//result = result.then(subtask.func.run);
 		}
 		else{
 			subtask.func.run();

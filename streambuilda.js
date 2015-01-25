@@ -193,7 +193,7 @@ var BuilderAsync = function(params){
 		//By default is async task
 		//Data can be on single task or in list
 		//connected - for connected tasks
-		task: function(tasktitle, data, connected){
+		task: function(tasktitle, data, connected, async){
 			//Check connected type
 			if(connected != undefined){
 				var checkconn = connected.filter(function(x){ return typeof x != 'string';});
@@ -204,32 +204,39 @@ var BuilderAsync = function(params){
 				}
 			}
 			if(tasktitle != undefined){
-				var task_append = {name: tasktitle, connect: connected}
+				var task_append = {name: tasktitle, connect: connected, async: async}
 				//Run tasks as sequence
 				if(Array.isArray(data)){
 					task_append.tasks = data
-					var prepare = {name: tasktitle, tasks: data, connect:connected};
+					var prepare = {name: tasktitle, tasks: data, connect:connected, async:async};
 					task_sys.tasks(prepare);
 					taskNames[tasktitle] = prepare;
 				}
 				else if('run' in data){
-					var prepare = {name: tasktitle, func:data.run, connect:connected}
+					var prepare = {name: tasktitle, func:data.run, connect:connected, async: async}
 					task_sys.task(prepare);
 					taskNames[tasktitle] = prepare;
 				}
 				else{
-					var prepare = {name: tasktitle, func: Commands.func(data).run, connect: connected};
+					var prepare = {name: tasktitle, func: Commands.func(data).run, connect: connected, async: async};
 					task_sys.task(prepare);
 					taskNames[tasktitle] = prepare;
 				}
 			}
 		},
 
+		//After this, run task in async
 		taskAsync: function(tasktitle, data){
-			if(Array.isArray(data)){
+			 this.task(tasktitle, data, undefined, true)
+			/*if(Array.isArray(data)){
 				var prepare = {name:tasktitle, tasks:data, async: true};
 				task_sys.tasks(prepare);
 			}
+
+			else if('run' in data){
+				var prepare = {name: tasktitle, func: data.run, async: true};
+				task_sys.task(prepare);
+			}*/
 		},
 
 
@@ -319,6 +326,11 @@ var BuilderAsync = function(params){
 		//Store current session
 		saveSession: function(name){
 
+		},
+
+		//Return info about current tasks (type of tasks)
+		info: function(){
+			return task_sys.info();
 		}
 	}
 };
