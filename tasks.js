@@ -206,25 +206,9 @@ var TaskSystem = (function(){
 			}
 			if(!_.isEmpty(singleNodes))
 				runSingleTasks(graph, singleNodes);
-			if(!_.isEmpty(subTasksNodes)){
+			if(!_.isEmpty(subTasksNodes))
+				runTasksWithSubTasks(graph, subTasksNodes);
 
-				//Run async tasks if exist
-				//Run in the case with subtasks
-				if(startnode != undefined){
-					//var start_task = graph.get(startnode);
-					runTask(graph, startnode);
-					graph.remove(startnode);
-					subTasksNodes = graph.getTasksWithSubTasks();
-				}
-				//Запускать асинхронные события, когда есть подзадачи
-				var complex = subTasksNodes.filter(function(task){
-					return graph.get(task).connect != undefined;
-				});
-				//Q.all(_.each(subTasksNodes, function(x){ return graph.get(x);}));
-				_.each(subTasksNodes, function(task){
-					runTask(graph, task);
-				});
-			}
 
 
 	},
@@ -452,6 +436,28 @@ var runComplexTasks = function(graph, complexNodes){
 			}
 		});
 }
+
+
+var runTasksWithSubTasks = function(graph, subTasksNodes, startnode){
+	//Run async tasks if exist
+	//Run in the case with subtasks
+	if(startnode != undefined){
+		//var start_task = graph.get(startnode);
+		runTask(graph, startnode);
+		graph.remove(startnode);
+		subTasksNodes = graph.getTasksWithSubTasks();
+	}
+	//Запускать асинхронные события, когда есть подзадачи
+	var complex = subTasksNodes.filter(function(task){
+			return graph.get(task).connect != undefined;
+	});
+	//Q.all(_.each(subTasksNodes, function(x){ return graph.get(x);}));
+	_.each(subTasksNodes, function(task){
+			runTask(graph, task);
+	});
+}
+
+
 
 var FinishedMessage = function(message){
 	console.log(message.yellow);

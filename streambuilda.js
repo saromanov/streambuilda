@@ -169,6 +169,8 @@ var BuilderAsync = function(params){
 				var result = JSON.parse(readJSONLike);
 				var keys = Object.keys(result);
 				var build = new BuilderAsync();
+				var connect=undefined;
+				var async = undefined;
 				if(keys.length != 0){
 					keys.forEach(function(taskname){
 						var commands = Object.keys(result[taskname]);
@@ -182,8 +184,22 @@ var BuilderAsync = function(params){
 								else
 									listoftasks.push(Commands[command](args));
 							}
+							else if(command == "async"){
+								async = true;
+							}
+							else{
+								//Check if this command write as commandA (run in async)
+								if(command.slice(-1) == 'A'){
+									var clear = command.substr(0, command.length-1);
+									if(clear in Commands){
+										async = true;
+										args = result[taskname][command]
+										listoftasks.push(Commands[clear](args));
+									}
+								}
+							}
 						});
-						build.task(taskname, listoftasks)
+						build.task(taskname, listoftasks, connect, async);
 					})
 				}
 				build.run();
