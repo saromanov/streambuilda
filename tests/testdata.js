@@ -41,3 +41,15 @@ var testSeq = function(){
 						Commands.shell('cp', ['test.js', 'test2.js'])])
 	builder.run();
 }
+
+/* Example of tasting task after completion */
+
+var testCompletion = function(){
+	var builder = new BuilderAsync();
+	builder.task('seq1', [Commands.livescript('astro.ls'), 
+						Commands.shell('cp', ['astro.js', 'astro3.js'])]);
+	builder.taskTest('seq1', function(){
+		return fs.existsSync('./astro3.js')
+	});
+	builder.run()
+}

@@ -125,6 +125,7 @@ var TaskSystem = (function(){
 	var gr = new TaskGraph();
 	//Reserved commands(as functions)
 	var commands = ['opendir', 'writefile', 'readfile', 'createdir'];
+	var tests = {}
 	return {
 
 		/* Append new task. Task can be on two types: Single or parent.
@@ -160,6 +161,14 @@ var TaskSystem = (function(){
 				gr.set(data);
 			}
 		},
+
+		/*
+			Test result, after the completion of the task
+		*/
+		test: function(name, func){
+			tests.name = func;
+		},
+
 
 		taskIfElse: function(taskif, taskelse){
 			Q.fcall(taskif.run).then(function(result){
@@ -209,7 +218,17 @@ var TaskSystem = (function(){
 			if(!_.isEmpty(subTasksNodes))
 				runTasksWithSubTasks(graph, subTasksNodes);
 
-
+			/* Optional testing of tasks */
+			_.each(tests, function(func, tasktitle){
+				if(func()){
+					var msg = "Task: " + tasktitle + " is complete"
+					console.log(msg.green)
+				}
+				else{
+					var msg = "Task: " + tasktitle + " is not completely correct"
+					console.log(msg.red)
+				}
+			})
 
 	},
 

@@ -242,7 +242,8 @@ var BuilderAsync = function(params){
 		},
 
 		//After this, run task in async
-		taskAsync: function(tasktitle, data){
+		//Connected async, run after current task
+		taskAsync: function(tasktitle, data, connectedAsync){
 			 this.task(tasktitle, data, undefined, true)
 			/*if(Array.isArray(data)){
 				var prepare = {name:tasktitle, tasks:data, async: true};
@@ -255,6 +256,10 @@ var BuilderAsync = function(params){
 			}*/
 		},
 
+
+		taskTest: function(tasktitle, func){
+			task_sys.test(tasktitle, func);
+		},
 
 		//Append task from loaded functions
 		usertask: function(title){
