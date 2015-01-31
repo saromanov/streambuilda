@@ -53,3 +53,13 @@ var testCompletion = function(){
 	});
 	builder.run()
 }
+
+/*
+	Run as sequence
+*/
+var testSeq2 = function(){
+	var builder = new BuilderAsync();
+	builder.task('seq1', Commands.livescript('astro.ls'));
+	builder.taskAsync('simple', Commands.jshint('streambuilda.js'));
+	builder.seq(['seq1', 'simple'])
+}

@@ -250,12 +250,10 @@ var Commands = (function(){
 
 					if(typeof paths != 'string' && Object.keys(paths).length > 0)
 						targetpath = paths.path
-					console.log("Start task livescript".red);
 					files = glob.sync(targetpath);
 					_.each(files, function(path){
 						RunShScript('lsc', ['-c', path]);
 					});
-					FinishedMessage('Finished task livescript');
 				}
 			}
 		},
@@ -374,20 +372,19 @@ var FinishedMessage = function(message){
 };
 
 var JSHint = function(path){
-	fs.readFile(path, 'utf-8', function(err, data){
-		if(data == undefined)
-			return false;
-		if(jshint(data.toString())){
-			console.log("File " + path + " not contain errors")
-			return true;
-		}
+	var data = fs.readFileSync(path, 'utf-8')
+	if(data == undefined)
+		return false;
+	if(jshint(data.toString())){
+		console.log("File " + path + " not contain errors")
+		return true;
+	}
 
-		jshint.data().errors.forEach(function(errordata){
-			if(errordata != null){
-				console.log("FILE: " + path)
-				console.log(errordata.line + " " + errordata.raw);
-			}
-		})
+	jshint.data().errors.forEach(function(errordata){
+		if(errordata != null){
+			console.log("FILE: " + path)
+			console.log(errordata.line + " " + errordata.raw);
+		}
 	})
 };
 

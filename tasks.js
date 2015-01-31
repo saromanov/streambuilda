@@ -232,6 +232,30 @@ var TaskSystem = (function(){
 
 	},
 
+	runSeq: function(tasknames, initval){
+		/* Run tasks as sequences */
+		var graphdata = gr.data();
+		if(!Array.isArray(tasknames))
+		{
+			console.error("data is not array of tasknames");
+			return;
+		}
+		if(tasknames.length == 0){
+			console.error("Data is not contain elements");
+			return;
+		}
+		var result = Q(initval)
+		tasknames.forEach(function(f){
+			if(f in graphdata){
+				var isfunc = graphdata[f].func;
+				if(isfunc)
+					result = result.then(isfunc);
+					console.log(result);
+			}
+		})
+
+	},
+
 	//Only for "sync tasks"
 	result: function(value){
 			return gr.get(value).result;
@@ -365,7 +389,11 @@ var runTask = function(graph, task){
 	var result = Q(current_task.tasks);
 	_.each(current_task.tasks, function(subtask){
 		if(current_task.async == true){
-			Q.fcall(subtask.func.run);
+			Q.fcall(subtask.func.run)
+			 .catch(function(x){
+			 	console.log("This is fail: ", x);
+			 })
+			 .done()
 			//result = result.then(subtask.func.run);
 		}
 		else{

@@ -335,13 +335,7 @@ var BuilderAsync = function(params){
 		},
 		//run data as sequence(every args from last event to next)
 		seq: function(data, initval){
-			var result = Q(initval)
-			data.forEach(function(f){
-				if (f in serializeFuncs)
-					result = result.then(serializeFuncs[f]);
-			    else
-					result = result.then(comm[f]);
-			})
+			task_sys.runSeq(data, initval);
 		},
 
 		//Store current session
@@ -399,3 +393,4 @@ var LoadStoredObjects = function(path){
 var createDir = function(dirname){
 	fs.mkdirSync(dirname);
 };
+
