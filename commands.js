@@ -63,6 +63,9 @@ var Commands = (function(){
 			}
 		},
 
+		/*
+			Compress js file
+		*/
 		compress: function(data){
 			return {
 				run: function(){
@@ -84,10 +87,19 @@ var Commands = (function(){
 				}
 			}
 		},
-		watchChanges: function(path, action){
+
+		/*
+			path - target path for watching
+			action after receipt of event
+			typeaction - name of action (change, add, ...)
+		*/
+		watchChanges: function(path, action, typeaction){
+			nameaction = typeaction
+			if(typeaction == undefined)
+				nameaction = 'change'
 			var watcher = chokidar.watch('streambuilda.js', {persistent: true});
 			watcher.on('change', function(path){
-			action == undefined?console.log('File', path, 'has been change'): action(path);
+				action == undefined?console.log('File', path, 'has been change'): action(path);
 			})
 			watcher.close()
 		},

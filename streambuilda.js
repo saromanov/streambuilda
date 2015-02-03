@@ -22,6 +22,7 @@ var fastjs = require('fast.js');
 			Schema= require('protobuf').Schema
 			validator = require('validator')
 			glob = require('glob');
+			_ = require('underscore');
 
 
 
@@ -222,7 +223,7 @@ var BuilderAsync = function(params){
 			if(tasktitle != undefined){
 				var task_append = {name: tasktitle, connect: connected, async: async}
 				//Run tasks as sequence
-				if(Array.isArray(data)){
+				if(_.isArray(data)){
 					task_append.tasks = data
 					var prepare = {name: tasktitle, tasks: data, connect:connected, async:async};
 					task_sys.tasks(prepare);
@@ -277,11 +278,6 @@ var BuilderAsync = function(params){
 			if(tasktitle != undefined && arg != undefined){
 				task_sys.args({name:tasktitle, args:arg})
 			}
-		},
-
-		taskAll: function(taslist){
-			//run if all tests is correct
-
 		},
 
 		//Run tasks with TaskSystem;
@@ -369,7 +365,7 @@ var HeartOfSB = function(path){
 	//console.log(files.lstatSync(path).isDirectory());
 	var fullpath = path + "/" + id.toString();
 	if(!fs.existsSync(path))
-		createDir(path);
+		fs.mkdirSync(path);
 	/*if(files.lstatSync(path).isDirectory()){
 		files.openSync(fullpath, 'w');
 	}*/
@@ -390,7 +386,4 @@ var LoadStoredObjects = function(path){
 	readSerializeFuncs(path);
 }
 
-var createDir = function(dirname){
-	fs.mkdirSync(dirname);
-};
-
+module.exports = BuilderAsync;

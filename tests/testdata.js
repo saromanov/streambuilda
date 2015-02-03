@@ -2,6 +2,12 @@
 var should = require('should')
 var BuilderAsync = require('../streambuilda.js')
 
+var Commands = requirejs('./commands')
+requirejs.config({
+baseUrl: __dirname,
+nodeRequire: require
+});
+
 var Test1 = function(){
 	var builder = new BuilderAsync();
 	builder.task('name1', [Commands.log("This is some log"),
@@ -63,3 +69,25 @@ var testSeq2 = function(){
 	builder.taskAsync('simple', Commands.jshint('streambuilda.js'));
 	builder.seq(['seq1', 'simple'])
 }
+
+var testProject1 = function(){
+	//Pr1 папка с тестовым проектом
+	//ДОлжны создаться
+	var builder = new BuilderAsync();
+	builder.task('lstojs', Commands.livescript('./pr1/astro.ls'));
+	builder.task('img', Commands.imgrotate({path: './pr1/funimg2.jpg', color:'red', degree:30}))
+	//builder.task('jshint', Commands.jshint('./pr1/tasks.js'))
+	builder.taskAsync('construct', [Commands.shell('mkdir', ['./pr1/src']), Commands.shell('mkdir', ['./pr1/img'])])
+	builder.taskAsync('cp', Commands.move('./pr1/astro.ls', './pr1/src/astro.ls'))
+	builder.run();
+
+}
+
+var testConfigure = function(){
+	var builder = new BuilderAsync();
+	builder.configureRun('taskdata.json');
+}
+
+
+
+TestComplexNodes();
