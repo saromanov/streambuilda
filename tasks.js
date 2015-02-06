@@ -250,7 +250,6 @@ var TaskSystem = (function(){
 				var isfunc = graphdata[f].func;
 				if(isfunc)
 					result = result.then(isfunc);
-					console.log(result);
 			}
 		})
 
@@ -387,6 +386,8 @@ var runTask = function(graph, task){
 	var current_task = graph.get(task);
 	/* Run over all subtasks */
 	var result = Q(current_task.tasks);
+	var msg = "Info: Task " + task + " contains " + current_task.tasks.length + " tasks";
+	console.log(msg)
 	_.each(current_task.tasks, function(subtask){
 		if(current_task.async == true){
 			Q.fcall(subtask.func.run)

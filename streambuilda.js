@@ -220,7 +220,11 @@ var BuilderAsync = function(params){
 					connected = undefined;
 				}
 			}
-			if(tasktitle != undefined){
+			if(!_.isString(tasktitle)){
+				console.error("Title of task, must be in string type");
+				return;
+			}
+			if(!_.isUndefined(tasktitle)){
 				var task_append = {name: tasktitle, connect: connected, async: async}
 				//Run tasks as sequence
 				if(_.isArray(data)){
@@ -229,12 +233,12 @@ var BuilderAsync = function(params){
 					task_sys.tasks(prepare);
 					taskNames[tasktitle] = prepare;
 				}
-				else if('run' in data){
+				else if(_.isObject(data) && 'run' in data){
 					var prepare = {name: tasktitle, func:data.run, connect:connected, async: async}
 					task_sys.task(prepare);
 					taskNames[tasktitle] = prepare;
 				}
-				else{
+				else if(_.isFunction(data)) {
 					var prepare = {name: tasktitle, func: Commands.func(data).run, connect: connected, async: async};
 					task_sys.task(prepare);
 					taskNames[tasktitle] = prepare;
@@ -245,16 +249,8 @@ var BuilderAsync = function(params){
 		//After this, run task in async
 		//Connected async, run after current task
 		taskAsync: function(tasktitle, data, connectedAsync){
+			 console.log("THis is data: ", data);
 			 this.task(tasktitle, data, undefined, true)
-			/*if(Array.isArray(data)){
-				var prepare = {name:tasktitle, tasks:data, async: true};
-				task_sys.tasks(prepare);
-			}
-
-			else if('run' in data){
-				var prepare = {name: tasktitle, func: data.run, async: true};
-				task_sys.task(prepare);
-			}*/
 		},
 
 
@@ -331,7 +327,8 @@ var BuilderAsync = function(params){
 		},
 		//run data as sequence(every args from last event to next)
 		seq: function(data, initval){
-			task_sys.runSeq(data, initval);
+			if(data != undefined && initval != undefined)
+				task_sys.runSeq(data, initval);
 		},
 
 		//Store current session
