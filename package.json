@@ -1,0 +1,37 @@
+{
+  "name": "streambilda",
+  "version": "0.0.1",
+  "description": "Yet another build system",
+  "author": "Sergey Romanov <xxsmotur@gmail.com>",
+  "contributors": [{
+  "name": "Foo Bar",
+  "email": "foo.bar@example.com"
+}],
+  "bin": {
+  "module-name": "./bin/module-name"
+},
+  "scripts": {
+    "test": "vows --spec --isolate",
+    "start": "node streambuilda.js",
+    "predeploy": "echo im about to deploy",
+    "postdeploy": "echo ive deployed"
+  },
+  "main": "streambuilda.js",
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/saromanov/streambuilda"
+},
+  "bugs": {
+  "url": "https://github.com/saromanov/streambuilda/issues"
+},
+  "keywords": [
+  "build",
+  "automatic",
+  "browsenpm"
+],
+  "dependencies": {
+    "underscore": "~1.7.0",
+    "async": "~0.8.0"
+  },
+  "license": "MIT"
+}

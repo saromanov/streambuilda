@@ -140,6 +140,7 @@ var BuilderAsync = function(params){
 	var IfElse = [];
 	var task_sys = TaskSystem;
 	var sys = HeartOfSB('./streambildas');
+	var projects = {}
 	return {
 		variable: [],
 		sysdir: './streambilda',
@@ -246,6 +247,11 @@ var BuilderAsync = function(params){
 			}
 		},
 
+		//Append project name
+		projectName: function(name){
+			projects[name] = [];
+		},
+
 		//After this, run task in async
 		//Connected async, run after current task
 		taskAsync: function(tasktitle, data, connectedAsync){
@@ -315,7 +321,13 @@ var BuilderAsync = function(params){
 		},
 
 		run: function(data){
-			//sys.append(taskNames);
+			var len = Object.keys(projects).length;
+			if(len > 0){
+				Object.keys(projects).forEach(function(x){
+					if(projects[x].length == 0)
+						projects[x] = taskNames;
+				})
+			}
 			console.log("Start running tasks: ", new Date());
 			if(IfElse.length > 0){
 				IfElse.forEach(function(x){
