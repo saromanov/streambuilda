@@ -131,6 +131,12 @@ var readSerializeFuncs = function(dirname){
 }
 
 
+var appendToLog = function(logname, info){
+	if(logname != undefined){
+		fs.appendFile(logname, info, 'utf-8')
+	}
+}
+
 //All tasks run as async
 //All events waitings for start
 var BuilderAsync = function(params){
@@ -141,6 +147,14 @@ var BuilderAsync = function(params){
 	var task_sys = TaskSystem;
 	var sys = HeartOfSB('./streambildas');
 	var projects = {}
+	var outlog = undefined
+	if(params != undefined){
+		if(params.output != undefined){
+			outlog = params.output;
+			fs.writeFile(outlog, 'Session is started\n', 'utf-8');
+		}
+
+	}
 	return {
 		variable: [],
 		sysdir: './streambilda',
@@ -335,7 +349,8 @@ var BuilderAsync = function(params){
 						task_sys.taskIfElse(x[0], x[1]);
 				})
 			}
-			task_sys.run(data);
+			appendToLog(outlog, "Tasks is started");
+			task_sys.run(this.outlog,data);
 		},
 		//run data as sequence(every args from last event to next)
 		seq: function(data, initval){
