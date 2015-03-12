@@ -284,6 +284,18 @@ var Commands = (function(){
 			}
 		},
 
+		run_node: function(path){
+			//Run node script
+			//Command is 
+			return {
+				run: function(){
+					console.log("Start node module".red);
+					RunShScript("node", path)
+					FinishedMessage('Finished running node js module')
+				}
+			}
+		},
+
 		//Output log message
 		log: function(message){
 			return {
