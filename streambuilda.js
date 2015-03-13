@@ -183,13 +183,15 @@ var BuilderAsync = function(params){
 					return;
 				}
 				var result = JSON.parse(readJSONLike);
-				var keys = Object.keys(result);
+
+				var keys = _.keys(result);
 				var build = new BuilderAsync();
+				//Unactive now
 				var connect=undefined;
 				var async = undefined;
 				if(keys.length != 0){
 					keys.forEach(function(taskname){
-						var commands = Object.keys(result[taskname]);
+						var commands = _.keys(result[taskname]);
 						//Tasks will be in list type
 						var listoftasks = [];
 						commands.forEach(function(command){
@@ -278,6 +280,11 @@ var BuilderAsync = function(params){
 			task_sys.test(tasktitle, func);
 		},
 
+		//Return current status of task
+		taskStatus: function(tasktitle){
+			return task_sys.result(tasktitle)
+		},
+
 		//Append task from loaded functions
 		usertask: function(title){
 			if(title in serializeFuncs){
@@ -286,6 +293,7 @@ var BuilderAsync = function(params){
 		}, 
 
 		taskIfElse: function(taskif, taskelse){
+			//If first task(taskif) is failed, run second task(taskelse)
 			IfElse.push([taskif, taskelse]);
 		},
 
@@ -309,31 +317,6 @@ var BuilderAsync = function(params){
 			tsystem.task(store);
 		},
 
-		//Serialization user function to ./funcs
-		//Note: Serialization without global objects
-		registerFunction: function(title, func){
-			var obj = {
-				name: title,
-				func: func
-			}
-			var dirname = './funcs/';
-			if(process.platform == 'win')
-				dirname = ".\\funcs";
-			var result = serialize.deepSerialize(obj);
-			fs.writeFileSync(dirname + title, JSON.stringify(result));
-
-		},
-
-		//Serialize task (This task may be use in future)
-		//Experimental
-		saveTask: function(taskname){
-			if(taskname in taskNames){
-				SerializeData(taskname, taskNames[taskname]);
-				var result = readSerializeFuncs(taskname);
-				console.log(result);
-			}
-		},
-
 		run: function(data){
 			var len = Object.keys(projects).length;
 			if(len > 0){
@@ -342,7 +325,7 @@ var BuilderAsync = function(params){
 						projects[x] = taskNames;
 				})
 			}
-			console.log("Start running tasks: ", new Date());
+			console.log("Start running of tasks: ", new Date());
 			if(IfElse.length > 0){
 				IfElse.forEach(function(x){
 					if(x.length == 2)
