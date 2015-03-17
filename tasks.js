@@ -391,8 +391,11 @@ var runTask = function(graph, task){
 	_.each(current_task.tasks, function(subtask){
 		if(current_task.async == true){
 			Q.fcall(subtask.func.run)
-			 .catch(function(x){
-			 	console.log("This is fail: ", x);
+			 .then(function(x){
+			 	
+			 })
+			 .fail(function(erroe){
+			 	console.log("Task was failed")
 			 })
 			 .done()
 			//result = result.then(subtask.func.run);
@@ -434,8 +437,7 @@ var runSingleTasks = function(graph, singleNodes){
 		//Case without a complex nodes
 		_.each(singleNodes, function(x){
 			sgraph = graph.get(x);
-			console.log("Start: ", x);
-			/*sgraph.func = sgraph.func().run*/
+			//If async flag is on, run in async
 			if(sgraph.async){
 				Q.fcall(sgraph.func, sgraph.args).then(function(result){
 					graph.update(x, 'result', result);
@@ -447,7 +449,9 @@ var runSingleTasks = function(graph, singleNodes){
 					message = "Something Went Wrong and arguments in task '" + sgraph.name + "' is undefined"
 					throw new SomethingException(message);
 				}
-				graph.update(x, 'result', sgraph.func.apply(this, sgraph.args));
+				var result = sgraph.func.apply(this, sgraph.args);
+				//Update if this return value
+				graph.update(x, 'result', result);
 				FinishedMessage('Finished task ' + x);
 			}
 			sleep.sleep(1);
