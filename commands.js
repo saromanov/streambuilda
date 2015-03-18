@@ -22,6 +22,7 @@ var fs = require('fs')
     csv = require('csv')
     //https://github.com/isaacs/node-glob
     glob = require('glob')
+    styl = require('styl');
 
 
 define(function(req){
@@ -364,7 +365,16 @@ var Commands = (function(){
 
 				}
 			}
-		}
+		},
+
+		styl: function(path, conf){
+			return {
+				run: function(){
+					var css = styl(conf, {compress: true}).toString()
+					console.log(css)
+				}
+			}
+		},
 
 	}
 })()
