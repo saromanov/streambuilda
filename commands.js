@@ -22,6 +22,7 @@ var fs = require('fs')
     csv = require('csv')
     //https://github.com/isaacs/node-glob
     glob = require('glob')
+    //https://github.com/tj/styl
     styl = require('styl');
 
 
@@ -94,15 +95,36 @@ var Commands = (function(){
 			action after receipt of event
 			typeaction - name of action (change, add, ...)
 		*/
-		watchChanges: function(path, action, typeaction){
-			nameaction = typeaction
-			if(typeaction == undefined)
-				nameaction = 'change'
-			var watcher = chokidar.watch('streambuilda.js', {persistent: true});
-			watcher.on('change', function(path){
-				action == undefined?console.log('File', path, 'has been change'): action(path);
-			})
-			watcher.close()
+		watchChanges: function(path, action){
+			return {
+				run: function() {
+					nameaction = 'change';
+					var watcher = chokidar.watch(path, {persistent: true});
+					console.log("watchChanges has been started".red);
+					watcher.on(nameaction, function(path){
+						action == undefined || typeof action != 'function'?console.log('File', path, 'has been change'): action(path);
+					});
+					watcher.add(path)
+				}
+			}
+			//watcher.close()
+		},
+
+		//Set own events to watcher(chokidar)
+		watchEvent: function(path, typeaction, action){
+			return {
+				run: function(){
+					nameaction = typeaction
+					if(typeaction == undefined)
+						nameaction = 'change';
+					var watcher = chokidar.watch(path, {persistent: true});
+					console.log("watchEvent has been started".red);
+					watcher.on(nameaction, function(path){
+						action == undefined || typeof action != 'function'?console.log('File', path, 'has been change'): action(path);
+					});
+					watcher.add(path)
+				}
+			}
 		},
 
 		//Create folders and subfolders
@@ -370,8 +392,8 @@ var Commands = (function(){
 		styl: function(path, conf){
 			return {
 				run: function(){
-					var css = styl(conf, {compress: true}).toString()
-					console.log(css)
+					/*var css = styl(conf, {compress: true}).toString()
+					console.log("Result: ")*/
 				}
 			}
 		},
