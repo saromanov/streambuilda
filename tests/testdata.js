@@ -1,6 +1,7 @@
 //http://unitjs.com/guide/should-js.html
 var should = require('should')
 var BuilderAsync = require('../streambuilda.js')
+var styl = require('styl')
 
 var Commands = requirejs('./commands')
 requirejs.config({
@@ -73,14 +74,30 @@ var testSeq2 = function(){
 var testProject1 = function(){
 	//Pr1 папка с тестовым проектом
 	//ДОлжны создаться
-	var builder = new BuilderAsync();
-	builder.task('lstojs', Commands.livescript('./pr1/astro.ls'));
-	builder.task('img', Commands.imgrotate({path: './pr1/funimg2.jpg', color:'red', degree:30}))
+	//var builder = new BuilderAsync({output:'log.txt'});
+	var builder = new BuilderAsync()
+	builder.taskAsync('lstojs', Commands.livescript('./pr1/astro.ls'));
+	builder.taskAsync('img', Commands.imgrotate({path: './pr1/funimg2.jpg', color:'red', degree:30}))
 	//builder.task('jshint', Commands.jshint('./pr1/tasks.js'))
-	builder.taskAsync('construct', [Commands.shell('mkdir', ['./pr1/src']), Commands.shell('mkdir', ['./pr1/img'])])
+	builder.taskAsync('construct', [Commands.shell('mkdir', ['./pr1']), Commands.shell('mkdir', ['./pr1/img']), Commands.shell('mkdir', ['./pr2'])])
 	builder.taskAsync('cp', Commands.move('./pr1/astro.ls', './pr1/src/astro.ls'))
+	builder.taskAsync('lr', Commands.livereload('./'))
 	builder.run();
+	console.log("Task Status: ", builder.taskStatus('img'))
 
+	//TODO: Изменить цвета выполненных тасков и провальных
+	//TODO: Система ошибок для тасков
+
+}
+
+
+var testProject2 = function(){
+	var builder = new BuilderAsync()
+	builder.taskAsync('styles', [Commands.styl("A", 'body\n  color: blue')]);
+	//builder.taskAsync('scripts', []);
+	builder.taskAsync('server', Commands.livereload('.'));
+	builder.taskAsync('watcher', Commands.watchChanges('.'));
+	builder.run()
 }
 
 var testConfigure = function(){
@@ -89,5 +106,16 @@ var testConfigure = function(){
 }
 
 
+var testAnother = function(){
+	var builder = new BuilderAsync();
+	builder.task(9855, function(){ console.log("Hello"); })
+	builder.seq();
+	builder.run();
+}
 
-TestComplexNodes();
+
+var testListOfAsyncTasks = function(){
+	var builder = new BuilderAsync();
+	builder.task('lstojs', [Commands.livescript('../astro.ls')]);
+	builder.run();
+}
