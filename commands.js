@@ -23,7 +23,9 @@ var fs = require('fs')
     //https://github.com/isaacs/node-glob
     glob = require('glob')
     //https://github.com/tj/styl
-    styl = require('styl');
+    styl = require('styl')
+    //https://github.com/vvo/concat-files
+    concat = require('concat-files');
 
 
 define(function(req){
@@ -91,6 +93,19 @@ var Commands = (function(){
 		},
 
 		/*
+			merge several files into the one js file
+		*/
+		concat: function(files, outfile){
+			return {
+				run: function(){
+					concat(files, outfile, function(done){
+						console.log("concat has been done".green);
+					});
+				}
+			}
+		},
+
+		/*
 			path - target path for watching
 			action after receipt of event
 			typeaction - name of action (change, add, ...)
@@ -122,7 +137,8 @@ var Commands = (function(){
 					watcher.on(nameaction, function(path){
 						action == undefined || typeof action != 'function'?console.log('File', path, 'has been change'): action(path);
 					});
-					watcher.add(path)
+					watcher.add(path);
+					watcher.close();
 				}
 			}
 		},
