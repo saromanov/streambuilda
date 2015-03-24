@@ -190,11 +190,11 @@ var BuilderAsync = function(params){
 				var connect=undefined;
 				var async = undefined;
 				if(keys.length != 0){
-					keys.forEach(function(taskname){
+					_.each(keys,function(taskname){
 						var commands = _.keys(result[taskname]);
 						//Tasks will be in list type
 						var listoftasks = [];
-						commands.forEach(function(command){
+						_.each(commands,function(command){
 							if(command in Commands){
 								args = result[taskname][command]
 								if(Array.isArray(args))
@@ -219,7 +219,7 @@ var BuilderAsync = function(params){
 						});
 						build.task(taskname, listoftasks, connect, async);
 					})
-				}
+				};
 				build.run();
 			}
 		},
@@ -317,6 +317,12 @@ var BuilderAsync = function(params){
 			tsystem.task(store);
 		},
 
+		//Connect to some task(with emits)
+		onTask: function(taskname, event, func){
+			if(_.isString(taskname) && _.isString(event))
+				task_sys.on(taskname + event, func);
+		},
+
 		run: function(data){
 			var len = Object.keys(projects).length;
 			if(len > 0){
@@ -327,7 +333,7 @@ var BuilderAsync = function(params){
 			}
 			console.log("Start running of tasks: ", new Date());
 			if(IfElse.length > 0){
-				IfElse.forEach(function(x){
+				_.each(IfElse,function(x){
 					if(x.length == 2)
 						task_sys.taskIfElse(x[0], x[1]);
 				})
@@ -352,7 +358,6 @@ var BuilderAsync = function(params){
 		}
 	}
 };
-
 
 var SerializeSystemData = function(path, obj){
 	var result = serialize.deepSerialize(HeartOfSB);

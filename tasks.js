@@ -4,6 +4,7 @@ var async = require('async')
 	Q = require('q')
 	uuid = require('node-uuid')
 	sleep = require('sleep')
+	emitter = new (require('events').EventEmitter);
 	
 
 //http://underscorejs.ru/
@@ -183,6 +184,11 @@ var TaskSystem = (function(){
 				return;
 			}
 			gr.setList(params);
+		},
+
+		//
+		on: function(title, func){
+			emitter.on(title, func);
 		},
 
 
