@@ -446,6 +446,8 @@ var runSingleTasks = function(graph, singleNodes){
 			//If async flag is on, run in async
 			if(sgraph.async){
 				Q.fcall(sgraph.func, sgraph.args).then(function(result){
+					console.log("This is title: ", sgraph.name);
+					emitter.emit(sgraph.title + 'complete')
 					graph.update(x, 'result', result);
 					FinishedMessage('Finished task ' + x);
 				}).done();

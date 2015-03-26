@@ -115,7 +115,6 @@ var Commands = (function(){
 				run: function() {
 					nameaction = 'change';
 					var watcher = chokidar.watch(path, {persistent: true});
-					console.log("watchChanges has been started".red);
 					watcher.on(nameaction, function(path){
 						action == undefined || typeof action != 'function'?console.log('File', path, 'has been change'): action(path);
 					});
@@ -207,13 +206,13 @@ var Commands = (function(){
 			return {
 				run: function(){
 					if(typeof paths == 'string'){
-						_.each(glob.sync(paths), function(x){JSHint(x);});
+						_.each(getPathsFromRegexp(paths), function(x){JSHint(x);});
 					}
 					else if(Array.isArray(paths)){
 						//Set several paths for jshint
 						if(paths.length > 0){
 							_.each(paths, function(path){
-								_.each(glob.sync(path), function(cpath){
+								_.each(getPathsFromRegexp(path), function(cpath){
 									JSHint(cpath)
 								});
 							});
@@ -301,7 +300,7 @@ var Commands = (function(){
 
 					if(typeof paths != 'string' && Object.keys(paths).length > 0)
 						targetpath = paths.path
-					files = glob.sync(targetpath);
+					var files = getPathsFromRegexp(targetpath);
 					_.each(files, function(path){
 						RunShScript('lsc', ['-c', path]);
 					});
@@ -394,13 +393,14 @@ var Commands = (function(){
 		csvload: function(path, conf){
 			return {
 				run: function(){
-					var generator = csv.generate(conf);
-					var parser = csv.parse();
-					var transformer = csv.transform(function(data){
+					var paths = getPathsFromRegexp(path);
+					_.each(paths, function(x){
+						var generator = csv.generate(conf);
+						var parser = csv.parse();
+						var transformer = csv.transform(function(data){
   							return data.map(function(value){return value.toUpperCase()});
+						});
 					});
-					//var stringifier = csv.stringify();
-
 				}
 			}
 		},
@@ -504,4 +504,9 @@ var imgGM = function(data, gmobject){
 		if (err != undefined)
 				console.log("Found error in write image", err);
 	});
+};
+
+//Return paths to files from regexp (for example *.js return all js files from path)
+var getPathsFromRegexp = function(paths){
+	return glob.sync(paths);
 };
